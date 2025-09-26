@@ -13,7 +13,7 @@ const CORE_WRITER = new Interface([
 
 function App() {
   const [txHash, setTxHash] = useState<string>(
-    "0xb90a856ce6288858e26e5744819e0e45c90305f6810436b4f3b621cc29af796d"
+    "0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e"
   );
 
   const [logs, setLogs] = useState<Array<Log>>([]);
