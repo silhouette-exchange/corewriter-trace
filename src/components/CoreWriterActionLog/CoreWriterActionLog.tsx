@@ -1,5 +1,6 @@
 import { AbiCoder, BytesLike } from "ethers";
 import { decodeCoreWriterAction } from "./decodeCoreWriterAction";
+import "./CoreWriterActionLog.css";
 
 interface ActionValueOutputProps {
   value: any;
@@ -25,15 +26,15 @@ export const CoreWriterActionLog = (props: CoreWriterActionLogProps) => {
   const action = decodeCoreWriterAction(data);
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <div>{action.type}</div>
-      <table>
+    <div className="action-log-card">
+      <div className="action-type">{action.type}</div>
+      <table className="action-table">
         <tbody>
           {Object.entries(action.data).map(([key, value], i) => {
             return (
               <tr key={i}>
-                <td style={{ fontWeight: "bold" }}>{key}</td>
-                <td>
+                <td className="action-key">{key}</td>
+                <td className="action-value">
                   <ActionValueOutput value={value} />
                 </td>
               </tr>
