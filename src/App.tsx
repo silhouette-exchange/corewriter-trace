@@ -1,11 +1,23 @@
 import { useCallback, useState } from "react";
 import "./App.css";
 import { CoreWriterActionLog } from "./components/CoreWriterActionLog";
-import { JsonRpcProvider, Log, Interface } from "ethers";
+import { JsonRpcProvider, Log, Interface, JsonRpcApiProvider } from "ethers";
 
-const PROVIDER = new JsonRpcProvider("https://rpc.purroofgroup.com", 999, {
-  staticNetwork: true,
-});
+const PROVIDER_MAINNET = new JsonRpcProvider(
+  "https://rpc.purroofgroup.com",
+  999,
+  {
+    staticNetwork: true,
+  }
+);
+
+const PROVIDER_TESTNET = new JsonRpcProvider(
+  "https://rpc.hyperliquid-testnet.xyz/evm",
+  998,
+  {
+    staticNetwork: true,
+  }
+);
 
 const CORE_WRITER = new Interface([
   "event RawAction(address indexed user, bytes data)",
@@ -13,14 +25,15 @@ const CORE_WRITER = new Interface([
 
 function App() {
   const [txHash, setTxHash] = useState<string>(
-    "0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e"
+    //"0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e"
+    "0xe9fd478f935e68dd708b9f90ca72703e753b27f92861c4db67554341e75ac2ad"
   );
 
   const [logs, setLogs] = useState<Array<Log>>([]);
 
   const [loading, setLoading] = useState(false);
 
-  const load = useCallback((tx: string) => {
+  const load = useCallback((tx: string, provider: JsonRpcProvider) => {
     setLogs([]);
 
     if (tx === undefined) {
@@ -29,7 +42,8 @@ function App() {
 
     setLoading(true);
 
-    PROVIDER.getTransactionReceipt(tx)
+    provider
+      .getTransactionReceipt(tx)
       .then((result) => {
         const logs =
           result?.logs.filter(
@@ -50,7 +64,12 @@ function App() {
           value={txHash}
           onChange={(event) => setTxHash(event.currentTarget.value)}
         />
-        <button onClick={() => txHash && load(txHash)}>Load</button>
+        <button onClick={() => txHash && load(txHash, PROVIDER_MAINNET)}>
+          Load (Mainnet)
+        </button>
+        <button onClick={() => txHash && load(txHash, PROVIDER_TESTNET)}>
+          Load (Testnet)
+        </button>
       </div>
       {logs.map((log) => (
         <CoreWriterActionLog

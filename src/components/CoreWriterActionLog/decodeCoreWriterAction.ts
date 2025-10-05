@@ -76,6 +76,17 @@ type UsdClassTransferAction = Action<"usdClassTransfer"> & {
   };
 };
 
+type SendAssetAction = Action<"sendAsset"> & {
+  data: {
+    destination: string;
+    subAccount: string;
+    source_dex: number;
+    destination_dex: number;
+    token: bigint;
+    wei: bigint;
+  };
+};
+
 type UnknownAction = Action<"unknown"> & {
   data: {
     data: string;
@@ -92,6 +103,7 @@ type CoreWriterAction =
   | UsdClassTransferAction
   | CancelOrderByOidAction
   | CancelOrderByCloidAction
+  | SendAssetAction
   | UnknownAction;
 
 const decodeLimitOrder = (data: string): Omit<LimitOrderAction, "version"> => {
@@ -242,6 +254,32 @@ const decodeCancelOrderByCloid = (
   };
 };
 
+const decodeSendAsset = (data: string): Omit<SendAssetAction, "version"> => {
+  const result = ABI.decode(
+    [
+      "address destination",
+      "address subAccount",
+      "uint32 source_dex",
+      "uint32 destination_dex",
+      "uint64 token",
+      "uint64 wei",
+    ],
+    `0x${data}`
+  );
+
+  return {
+    type: "sendAsset",
+    data: {
+      destination: result.destination,
+      subAccount: result.subAccount,
+      source_dex: Number(result.source_dex),
+      destination_dex: Number(result.destination_dex),
+      token: BigInt(result.token),
+      wei: BigInt(result.wei),
+    },
+  };
+};
+
 export const decodeCoreWriterAction = (data: string): CoreWriterAction => {
   const version = parseInt(`0x${data.slice(2, 4)}`);
 
@@ -265,7 +303,6 @@ export const decodeCoreWriterAction = (data: string): CoreWriterAction => {
         version,
         ...decodeTokenDelegate(payload),
       };
-
     case 4:
       return {
         version,
@@ -295,6 +332,11 @@ export const decodeCoreWriterAction = (data: string): CoreWriterAction => {
       return {
         version,
         ...decodeCancelOrderByCloid(payload),
+      };
+    case 13:
+      return {
+        version,
+        ...decodeSendAsset(payload),
       };
   }
 
