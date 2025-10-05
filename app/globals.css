@@ -1,3 +1,18 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #fafafa;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
 .App {
   max-width: 1200px;
   margin: 0 auto;
@@ -130,6 +145,57 @@
   font-weight: 600;
 }
 
+/* CoreWriterActionLog Component Styles */
+.action-log-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.action-log-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.action-type {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.action-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.action-table tr:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.action-key {
+  font-weight: 600;
+  color: #4b5563;
+  padding: 0.75rem 1rem 0.75rem 0;
+  vertical-align: top;
+  width: 30%;
+  font-size: 0.95rem;
+}
+
+.action-value {
+  color: #1f2937;
+  padding: 0.75rem 0;
+  word-break: break-all;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .App {
     padding: 1rem;
@@ -153,5 +219,29 @@
 
   .load-button {
     width: 100%;
+  }
+
+  .action-log-card {
+    padding: 1rem;
+  }
+
+  .action-type {
+    font-size: 1.1rem;
+  }
+
+  .action-key,
+  .action-value {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0;
+  }
+
+  .action-key {
+    font-size: 0.9rem;
+  }
+
+  .action-value {
+    font-size: 0.85rem;
+    padding-bottom: 1rem;
   }
 }
