@@ -1,4 +1,5 @@
 import { TransactionResponse, TransactionReceipt, Block, formatEther } from "ethers";
+import { useCallback, useMemo } from "react";
 
 interface TransactionInfoProps {
   transaction: TransactionResponse;
@@ -7,19 +8,27 @@ interface TransactionInfoProps {
 }
 
 export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfoProps) => {
-  const formatGasPrice = (gasPrice: bigint | null) => {
+  const formatGasPrice = useCallback((gasPrice: bigint | null) => {
     if (!gasPrice) return "N/A";
     const gwei = Number(gasPrice) / 1e9;
     return `${gwei.toFixed(2)} Gwei`;
-  };
+  }, []);
 
-  const formatTimestamp = (timestamp: number | undefined) => {
+  const formatTimestamp = useCallback((timestamp: number | undefined) => {
     if (!timestamp) return "N/A";
     const date = new Date(timestamp * 1000);
     return date.toLocaleString();
-  };
+  }, []);
 
-  const totalGasFee = receipt.gasUsed * (receipt.gasPrice || transaction.gasPrice || 0n);
+  const totalGasFee = useMemo(() => {
+    const gasPrice = receipt.gasPrice || transaction.gasPrice || 0n;
+    try {
+      return receipt.gasUsed * gasPrice;
+    } catch (error) {
+      console.warn('Gas fee calculation overflow:', error);
+      return 0n;
+    }
+  }, [receipt.gasUsed, receipt.gasPrice, transaction.gasPrice]);
 
   return (
     <div className="transaction-info-container">
@@ -144,4 +153,3 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
     </div>
   );
 };
-

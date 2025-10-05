@@ -5,6 +5,7 @@ import { CoreWriterActionLog } from "./components/CoreWriterActionLog";
 import { TransactionInfo } from "./components/TransactionInfo";
 import { AllLogs } from "./components/AllLogs";
 import { JsonRpcProvider, Log, Interface, TransactionResponse, TransactionReceipt, Block } from "ethers";
+import { CORE_WRITER_ADDRESS } from "../constants/addresses";
 
 const MAINNET_RPC = "https://rpc.purroofgroup.com";
 const TESTNET_RPC = "https://rpc.hyperliquid-testnet.xyz/evm";
@@ -90,7 +91,7 @@ export default function Home() {
       const coreWriterLogs =
         receiptResult?.logs.filter(
           (log) =>
-            log.address.toLowerCase() === "0x3333333333333333333333333333333333333333"
+            log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase()
         ) ?? [];
 
       setLogs(coreWriterLogs);
@@ -99,7 +100,15 @@ export default function Home() {
         console.log("No CoreWriter actions found in this transaction");
       }
     } catch (err: any) {
-      setError(`Error loading transaction: ${err.message}`);
+      if (err.code === 'NETWORK_ERROR') {
+        setError('Network error: Please check your connection and try again.');
+      } else if (err.code === 'INVALID_ARGUMENT') {
+        setError('Invalid transaction hash format.');
+      } else if (err.code === 'SERVER_ERROR') {
+        setError('RPC server error: Please try again later.');
+      } else {
+        setError(`Error loading transaction: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }

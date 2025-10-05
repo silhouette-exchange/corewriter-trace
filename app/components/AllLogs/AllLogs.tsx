@@ -1,5 +1,6 @@
 import { Log } from "ethers";
 import { useState } from "react";
+import { CORE_WRITER_ADDRESS } from "../../constants/addresses";
 
 interface AllLogsProps {
   logs: Log[];
@@ -14,9 +15,26 @@ interface LogEntryProps {
 const LogEntry = ({ log, index, isCoreWriter }: LogEntryProps) => {
   const [expanded, setExpanded] = useState(false);
 
+  const handleToggle = () => setExpanded(!expanded);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggle();
+    }
+  };
+
   return (
     <div className={`log-entry ${isCoreWriter ? 'log-corewriter' : ''}`}>
-      <div className="log-header" onClick={() => setExpanded(!expanded)}>
+      <div 
+        className="log-header" 
+        onClick={handleToggle}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        aria-controls={`log-details-${log.index}`}
+        onKeyDown={handleKeyDown}
+      >
         <span className="log-index">Log #{index}</span>
         {isCoreWriter && <span className="log-badge">CoreWriter</span>}
         <span className="log-address">
@@ -26,7 +44,7 @@ const LogEntry = ({ log, index, isCoreWriter }: LogEntryProps) => {
       </div>
       
       {expanded && (
-        <div className="log-details">
+        <div className="log-details" id={`log-details-${log.index}`}>
           <table className="log-table">
             <tbody>
               <tr>
@@ -80,7 +98,6 @@ const LogEntry = ({ log, index, isCoreWriter }: LogEntryProps) => {
 
 export const AllLogs = ({ logs }: AllLogsProps) => {
   const [showAllLogs, setShowAllLogs] = useState(false);
-  const CORE_WRITER_ADDRESS = "0x3333333333333333333333333333333333333333";
 
   const coreWriterLogs = logs.filter(
     log => log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase()
@@ -142,4 +159,3 @@ export const AllLogs = ({ logs }: AllLogsProps) => {
     </div>
   );
 };
-
