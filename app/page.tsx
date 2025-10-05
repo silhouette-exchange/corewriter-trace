@@ -1,5 +1,6 @@
+'use client'
+
 import { useCallback, useState, useMemo } from "react";
-import "./App.css";
 import { CoreWriterActionLog } from "./components/CoreWriterActionLog";
 import { JsonRpcProvider, Log, Interface } from "ethers";
 
@@ -12,7 +13,7 @@ const CORE_WRITER = new Interface([
 
 type Network = "mainnet" | "testnet" | "custom";
 
-function App() {
+export default function Home() {
   const [txHash, setTxHash] = useState<string>(
     "0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e"
   );
@@ -157,4 +158,3 @@ function App() {
   );
 }
 
-export default App;

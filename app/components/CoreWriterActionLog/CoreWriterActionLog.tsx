@@ -1,6 +1,5 @@
 import { AbiCoder, BytesLike } from "ethers";
 import { decodeCoreWriterAction } from "./decodeCoreWriterAction";
-import "./CoreWriterActionLog.css";
 
 interface ActionValueOutputProps {
   value: any;
