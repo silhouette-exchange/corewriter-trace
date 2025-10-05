@@ -2,9 +2,9 @@
 
 A modern Next.js application for decoding Hyperliquid CoreWriter actions from transaction logs. Built with React 19, Next.js 15, and TypeScript for optimal performance and developer experience.
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=flat-square&logo=next.js)
-![React](https://img.shields.io/badge/React-19.2.0-blue?style=flat-square&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?style=flat-square&logo=typescript)
+![Next.js](https://img.shields.io/badge/Next.js-15.1.6-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19.1.1-blue?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-blue?style=flat-square&logo=typescript)
 ![pnpm](https://img.shields.io/badge/pnpm-9.15.0+-orange?style=flat-square&logo=pnpm)
 
 ## ✨ Features
@@ -73,7 +73,7 @@ npx serve out/
 ### Example Transaction
 
 Try this sample transaction hash on Mainnet:
-```
+```text
 0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e
 ```
 
@@ -81,7 +81,7 @@ Try this sample transaction hash on Mainnet:
 
 ### Project Structure
 
-```
+```text
 corewriter-trace/
 ├── app/                          # Next.js App Router
 │   ├── components/              # React components
@@ -271,4 +271,3 @@ All functionality from the original CRA version has been preserved while gaining
 ---
 
 Built with ❤️ by the Silhouette Exchange team
-
