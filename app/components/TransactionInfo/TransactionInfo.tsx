@@ -141,7 +141,7 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
             <tr>
               <td className="info-label">Input Data:</td>
               <td className="info-value">
-                {transaction.data.length} bytes
+                {Math.max(0, Math.floor((transaction.data.length - 2) / 2))} bytes
                 {transaction.data !== "0x" && (
                   <details className="data-details">
                     <summary>View Data</summary>
