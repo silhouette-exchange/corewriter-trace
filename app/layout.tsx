@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'CoreWriter Trace',
-  description: 'Decode Hyperliquid CoreWriter actions from transaction logs',
+  description: 'View comprehensive transaction information and decode Hyperliquid CoreWriter actions',
 }
 
 export default function RootLayout({
@@ -17,4 +17,3 @@ export default function RootLayout({
     </html>
   )
 }
-
