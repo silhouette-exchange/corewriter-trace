@@ -203,7 +203,8 @@ export default function Home() {
                     data={
                       CORE_WRITER.decodeEventLog(
                         CORE_WRITER.getEvent("RawAction")!,
-                        log.data
+                        log.data,
+                        log.topics
                       )[1]
                     }
                   />
