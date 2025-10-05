@@ -20,15 +20,22 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
     return date.toLocaleString();
   }, []);
 
-  const totalGasFee = useMemo(() => {
-    const gasPrice = receipt.gasPrice || transaction.gasPrice || 0n;
+  const { totalGasFee, effectiveGasPrice } = useMemo(() => {
+    // Use effectiveGasPrice for EIP-1559 transactions, fallback to gasPrice for legacy transactions
+    const gasPrice = receipt.effectiveGasPrice || transaction.gasPrice || 0n;
     try {
-      return receipt.gasUsed * gasPrice;
+      return {
+        totalGasFee: receipt.gasUsed * gasPrice,
+        effectiveGasPrice: gasPrice
+      };
     } catch (error) {
       console.warn('Gas fee calculation overflow:', error);
-      return 0n;
+      return {
+        totalGasFee: 0n,
+        effectiveGasPrice: gasPrice
+      };
     }
-  }, [receipt.gasUsed, receipt.gasPrice, transaction.gasPrice]);
+  }, [receipt.gasUsed, receipt.effectiveGasPrice, transaction.gasPrice]);
 
   return (
     <div className="transaction-info-container">
@@ -105,7 +112,7 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
             <tr>
               <td className="info-label">Gas Price:</td>
               <td className="info-value">
-                {formatGasPrice(receipt.gasPrice || transaction.gasPrice)}
+                {formatGasPrice(effectiveGasPrice)}
               </td>
             </tr>
             <tr>
