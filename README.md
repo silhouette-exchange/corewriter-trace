@@ -21,7 +21,7 @@ A modern Next.js application for decoding Hyperliquid CoreWriter actions from tr
 
 ### Prerequisites
 
-- **Node.js**: 18.0.0 or higher
+- **Node.js**: 18.18.0 or higher (or active LTS 20+ recommended)
 - **pnpm**: 8.0.0 or higher (recommended package manager)
 
 ### Installation
@@ -53,15 +53,17 @@ pnpm dev
 ### Building for Production
 
 ```bash
-# Build the application
+# Build the application (produces static files in out/ directory)
 pnpm build
 
-# Start production server
+# Serve the static export with a static file server
 pnpm start
 
-# Or serve the static export
+# Or use npx serve directly
 npx serve out/
 ```
+
+**Note**: This project uses Next.js with `output: 'export'` which produces static files. Next.js production server (`next start`) is disabled for export mode, so a static file server must be used instead.
 
 ## 📖 Usage
 
