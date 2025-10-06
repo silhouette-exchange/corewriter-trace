@@ -22,7 +22,7 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
 
   const { totalGasFee, effectiveGasPrice } = useMemo(() => {
     // Use effectiveGasPrice for EIP-1559 transactions, fallback to gasPrice for legacy transactions
-    const gasPrice = receipt.effectiveGasPrice || transaction.gasPrice || 0n;
+    const gasPrice = (receipt as any).effectiveGasPrice || transaction.gasPrice || BigInt(0);
     try {
       return {
         totalGasFee: receipt.gasUsed * gasPrice,
@@ -31,11 +31,11 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
     } catch (error) {
       console.warn('Gas fee calculation overflow:', error);
       return {
-        totalGasFee: 0n,
+        totalGasFee: BigInt(0),
         effectiveGasPrice: gasPrice
       };
     }
-  }, [receipt.gasUsed, receipt.effectiveGasPrice, transaction.gasPrice]);
+  }, [receipt.gasUsed, (receipt as any).effectiveGasPrice, transaction.gasPrice]);
 
   return (
     <div className="transaction-info-container">
@@ -83,7 +83,7 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
               <td className="info-label">Value:</td>
               <td className="info-value">
                 {formatEther(transaction.value)} ETH
-                {transaction.value > 0n && (
+                {transaction.value > BigInt(0) && (
                   <span className="info-secondary"> ({transaction.value.toString()} wei)</span>
                 )}
               </td>

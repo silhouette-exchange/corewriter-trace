@@ -40,6 +40,41 @@ code {
   font-size: 1.1rem;
 }
 
+.tab-switcher {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.tab-button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #ffffff;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+  background: #f3f4f6;
+}
+
+.tab-button.active {
+  color: #ffffff;
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
 .config-section {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -595,4 +630,56 @@ code {
     flex-basis: 100%;
     order: 3;
   }
+}
+
+/* HyperCore Transaction Info Styles */
+.transaction-info {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row.full-width {
+  grid-template-columns: 1fr;
+}
+
+.hash-value {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.error-value {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.json-value {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  color: #374151;
+  margin: 0;
 }
