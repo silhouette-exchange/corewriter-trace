@@ -137,9 +137,25 @@ export default function Home() {
 
   const loadHyperCore = useCallback(async (tx: string) => {
     try {
-      const transport = new hl.HttpTransport({
+      // Configure transport with custom RPC if provided
+      const transportConfig: any = {
         isTestnet: hyperCoreNetwork === "testnet"
-      });
+      };
+
+      // Add custom URL if using custom network and URL is provided
+      if (hyperCoreNetwork === "custom" && hyperCoreCustomRpc) {
+        try {
+          // Validate URL format
+          new URL(hyperCoreCustomRpc);
+          transportConfig.baseUrl = hyperCoreCustomRpc;
+        } catch (urlError) {
+          // If custom URL is invalid, fall back to default and show warning
+          console.warn(`Invalid custom RPC URL: ${hyperCoreCustomRpc}, falling back to mainnet`);
+          setHyperCoreError(`Invalid custom RPC URL format. Using mainnet instead.`);
+        }
+      }
+
+      const transport = new hl.HttpTransport(transportConfig);
       const client = new hl.InfoClient({ transport });
 
       const result = await client.txDetails({ hash: tx as `0x${string}` });
@@ -149,7 +165,7 @@ export default function Home() {
     } finally {
       setHyperCoreLoading(false);
     }
-  }, [hyperCoreNetwork]);
+  }, [hyperCoreNetwork, hyperCoreCustomRpc]);
 
   const load = useCallback(async (tx: string) => {
     if (tx === undefined || tx === "") {
