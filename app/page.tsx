@@ -33,19 +33,28 @@ type Network = "mainnet" | "testnet" | "custom";
 type ChainType = "hyperevm" | "hypercore";
 
 export default function Home() {
-  const [txHash, setTxHash] = useState<string>(
+  // Separate state for each chain type
+  const [hyperEvmTxHash, setHyperEvmTxHash] = useState<string>(
     "0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e"
   );
+  const [hyperCoreTxHash, setHyperCoreTxHash] = useState<string>("");
+  
   const [network, setNetwork] = useState<Network>("mainnet");
   const [customRpc, setCustomRpc] = useState<string>("");
   const [chainType, setChainType] = useState<ChainType>("hyperevm");
-  const [transaction, setTransaction] = useState<TransactionResponse | null>(null);
-  const [receipt, setReceipt] = useState<TransactionReceipt | null>(null);
-  const [block, setBlock] = useState<Block | null>(null);
-  const [logs, setLogs] = useState<Array<Log>>([]);
+  
+  // Separate results for HyperEVM (L2)
+  const [hyperEvmTransaction, setHyperEvmTransaction] = useState<TransactionResponse | null>(null);
+  const [hyperEvmReceipt, setHyperEvmReceipt] = useState<TransactionReceipt | null>(null);
+  const [hyperEvmBlock, setHyperEvmBlock] = useState<Block | null>(null);
+  const [hyperEvmLogs, setHyperEvmLogs] = useState<Array<Log>>([]);
+  const [hyperEvmError, setHyperEvmError] = useState<string>("");
+  const [hyperEvmLoading, setHyperEvmLoading] = useState(false);
+  
+  // Separate results for HyperCore (L1)
   const [hyperCoreTx, setHyperCoreTx] = useState<TxDetails | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [hyperCoreError, setHyperCoreError] = useState<string>("");
+  const [hyperCoreLoading, setHyperCoreLoading] = useState(false);
 
   const provider = useMemo(() => {
     let rpcUrl: string;
@@ -68,26 +77,26 @@ export default function Home() {
       // Fetch transaction receipt
       const receiptResult = await provider.getTransactionReceipt(tx);
       if (!receiptResult) {
-        setError("Transaction not found");
-        setLoading(false);
+        setHyperEvmError("Transaction not found");
+        setHyperEvmLoading(false);
         return;
       }
-      setReceipt(receiptResult);
+      setHyperEvmReceipt(receiptResult);
 
       // Fetch transaction details
       const transactionResult = await provider.getTransaction(tx);
       if (!transactionResult) {
-        setError("Transaction details not found");
-        setLoading(false);
+        setHyperEvmError("Transaction details not found");
+        setHyperEvmLoading(false);
         return;
       }
-      setTransaction(transactionResult);
+      setHyperEvmTransaction(transactionResult);
 
       // Fetch block information
       if (transactionResult.blockNumber) {
         try {
           const blockResult = await provider.getBlock(transactionResult.blockNumber);
-          setBlock(blockResult);
+          setHyperEvmBlock(blockResult);
         } catch (err) {
           console.warn("Could not fetch block information:", err);
         }
@@ -100,23 +109,23 @@ export default function Home() {
             log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase()
         ) ?? [];
 
-      setLogs(coreWriterLogs);
+      setHyperEvmLogs(coreWriterLogs);
 
       if (coreWriterLogs.length === 0) {
         console.log("No CoreWriter actions found in this transaction");
       }
     } catch (err: any) {
       if (err.code === 'NETWORK_ERROR') {
-        setError('Network error: Please check your connection and try again.');
+        setHyperEvmError('Network error: Please check your connection and try again.');
       } else if (err.code === 'INVALID_ARGUMENT') {
-        setError('Invalid transaction hash format.');
+        setHyperEvmError('Invalid transaction hash format.');
       } else if (err.code === 'SERVER_ERROR') {
-        setError('RPC server error: Please try again later.');
+        setHyperEvmError('RPC server error: Please try again later.');
       } else {
-        setError(`Error loading transaction: ${err.message}`);
+        setHyperEvmError(`Error loading transaction: ${err.message}`);
       }
     } finally {
-      setLoading(false);
+      setHyperEvmLoading(false);
     }
   }, [provider]);
 
@@ -130,29 +139,29 @@ export default function Home() {
       const result = await client.txDetails({ hash: tx as `0x${string}` });
       setHyperCoreTx(result.tx);
     } catch (err: any) {
-      setError(`Error loading HyperCore transaction: ${err.message || 'Unknown error'}`);
+      setHyperCoreError(`Error loading HyperCore transaction: ${err.message || 'Unknown error'}`);
     } finally {
-      setLoading(false);
+      setHyperCoreLoading(false);
     }
   }, [network]);
 
   const load = useCallback(async (tx: string) => {
-    setLogs([]);
-    setTransaction(null);
-    setReceipt(null);
-    setBlock(null);
-    setHyperCoreTx(null);
-    setError("");
-
     if (tx === undefined || tx === "") {
       return Promise.resolve();
     }
 
-    setLoading(true);
-
     if (chainType === "hyperevm") {
+      setHyperEvmLogs([]);
+      setHyperEvmTransaction(null);
+      setHyperEvmReceipt(null);
+      setHyperEvmBlock(null);
+      setHyperEvmError("");
+      setHyperEvmLoading(true);
       await loadHyperEVM(tx);
     } else {
+      setHyperCoreTx(null);
+      setHyperCoreError("");
+      setHyperCoreLoading(true);
       await loadHyperCore(tx);
     }
   }, [chainType, loadHyperEVM, loadHyperCore]);
@@ -214,48 +223,64 @@ export default function Home() {
             <input
               id="txHash"
               type="text"
-              value={txHash}
-              onChange={(event) => setTxHash(event.currentTarget.value)}
+              value={chainType === "hyperevm" ? hyperEvmTxHash : hyperCoreTxHash}
+              onChange={(event) => {
+                const newHash = event.currentTarget.value;
+                if (chainType === "hyperevm") {
+                  setHyperEvmTxHash(newHash);
+                } else {
+                  setHyperCoreTxHash(newHash);
+                }
+              }}
               placeholder="0x..."
               className="text-input"
             />
             <button 
-              onClick={() => txHash && load(txHash)} 
-              disabled={loading}
+              onClick={() => {
+                const txHash = chainType === "hyperevm" ? hyperEvmTxHash : hyperCoreTxHash;
+                txHash && load(txHash);
+              }} 
+              disabled={chainType === "hyperevm" ? hyperEvmLoading : hyperCoreLoading}
               className="load-button"
             >
-              {loading ? "Loading..." : "Load"}
+              {(chainType === "hyperevm" ? hyperEvmLoading : hyperCoreLoading) ? "Loading..." : "Load"}
             </button>
           </div>
         </div>
       </div>
 
-      {error && (
+      {chainType === "hyperevm" && hyperEvmError && (
         <div className="error-message">
-          {error}
+          {hyperEvmError}
         </div>
       )}
 
-      {chainType === "hyperevm" && transaction && receipt && (
+      {chainType === "hypercore" && hyperCoreError && (
+        <div className="error-message">
+          {hyperCoreError}
+        </div>
+      )}
+
+      {chainType === "hyperevm" && hyperEvmTransaction && hyperEvmReceipt && (
         <>
           <div className="results-section">
             <h2>Transaction Overview</h2>
             <TransactionInfo 
-              transaction={transaction} 
-              receipt={receipt} 
-              block={block}
+              transaction={hyperEvmTransaction} 
+              receipt={hyperEvmReceipt} 
+              block={hyperEvmBlock}
             />
           </div>
 
           <div className="results-section">
-            <AllLogs logs={[...receipt.logs]} />
+            <AllLogs logs={[...hyperEvmReceipt.logs]} />
           </div>
 
-          {logs.length > 0 && (
+          {hyperEvmLogs.length > 0 && (
             <div className="results-section">
-              <h2>CoreWriter Actions ({logs.length})</h2>
+              <h2>CoreWriter Actions ({hyperEvmLogs.length})</h2>
               <div className="corewriter-actions">
-                {logs.map((log, index) => (
+                {hyperEvmLogs.map((log, index) => (
                   <CoreWriterActionLog
                     key={index}
                     data={
