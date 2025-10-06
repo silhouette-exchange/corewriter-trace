@@ -4,8 +4,10 @@ import { useCallback, useState, useMemo } from "react";
 import { CoreWriterActionLog } from "./components/CoreWriterActionLog";
 import { TransactionInfo } from "./components/TransactionInfo";
 import { AllLogs } from "./components/AllLogs";
+import { HyperCoreTransactionInfo } from "./components/HyperCoreTransactionInfo";
 import { JsonRpcProvider, Log, Interface, TransactionResponse, TransactionReceipt, Block } from "ethers";
 import { CORE_WRITER_ADDRESS } from "../constants/addresses";
+import { HttpTransport, PublicClient, type TxDetails } from "@nktkas/hyperliquid";
 
 const MAINNET_RPC = "https://rpc.purroofgroup.com";
 const TESTNET_RPC = "https://rpc.hyperliquid-testnet.xyz/evm";
@@ -15,6 +17,7 @@ const CORE_WRITER = new Interface([
 ]);
 
 type Network = "mainnet" | "testnet" | "custom";
+type ChainType = "hyperevm" | "hypercore";
 
 export default function Home() {
   const [txHash, setTxHash] = useState<string>(
@@ -22,10 +25,12 @@ export default function Home() {
   );
   const [network, setNetwork] = useState<Network>("mainnet");
   const [customRpc, setCustomRpc] = useState<string>("");
+  const [chainType, setChainType] = useState<ChainType>("hyperevm");
   const [transaction, setTransaction] = useState<TransactionResponse | null>(null);
   const [receipt, setReceipt] = useState<TransactionReceipt | null>(null);
   const [block, setBlock] = useState<Block | null>(null);
   const [logs, setLogs] = useState<Array<Log>>([]);
+  const [hyperCoreTx, setHyperCoreTx] = useState<TxDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
@@ -45,19 +50,7 @@ export default function Home() {
     });
   }, [network, customRpc]);
 
-  const load = useCallback(async (tx: string) => {
-    setLogs([]);
-    setTransaction(null);
-    setReceipt(null);
-    setBlock(null);
-    setError("");
-
-    if (tx === undefined || tx === "") {
-      return Promise.resolve();
-    }
-
-    setLoading(true);
-
+  const loadHyperEVM = useCallback(async (tx: string) => {
     try {
       // Fetch transaction receipt
       const receiptResult = await provider.getTransactionReceipt(tx);
@@ -114,11 +107,65 @@ export default function Home() {
     }
   }, [provider]);
 
+  const loadHyperCore = useCallback(async (tx: string) => {
+    try {
+      const transport = new HttpTransport({
+        url: network === "testnet" 
+          ? "https://api.hyperliquid-testnet.xyz"
+          : "https://api.hyperliquid.xyz"
+      });
+      const client = new PublicClient({ transport });
+
+      const result = await client.txDetails({ hash: tx as `0x${string}` });
+      setHyperCoreTx(result.tx);
+    } catch (err: any) {
+      setError(`Error loading HyperCore transaction: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [network]);
+
+  const load = useCallback(async (tx: string) => {
+    setLogs([]);
+    setTransaction(null);
+    setReceipt(null);
+    setBlock(null);
+    setHyperCoreTx(null);
+    setError("");
+
+    if (tx === undefined || tx === "") {
+      return Promise.resolve();
+    }
+
+    setLoading(true);
+
+    if (chainType === "hyperevm") {
+      await loadHyperEVM(tx);
+    } else {
+      await loadHyperCore(tx);
+    }
+  }, [chainType, loadHyperEVM, loadHyperCore]);
+
   return (
     <div className="App">
       <div className="header">
         <h1>CoreWriter Trace</h1>
         <p className="subtitle">View comprehensive transaction information and decode CoreWriter actions</p>
+      </div>
+
+      <div className="tab-switcher">
+        <button 
+          className={`tab-button ${chainType === "hyperevm" ? "active" : ""}`}
+          onClick={() => setChainType("hyperevm")}
+        >
+          HyperEVM (L2)
+        </button>
+        <button 
+          className={`tab-button ${chainType === "hypercore" ? "active" : ""}`}
+          onClick={() => setChainType("hypercore")}
+        >
+          HyperCore (L1)
+        </button>
       </div>
 
       <div className="config-section">
@@ -178,7 +225,7 @@ export default function Home() {
         </div>
       )}
 
-      {transaction && receipt && (
+      {chainType === "hyperevm" && transaction && receipt && (
         <>
           <div className="results-section">
             <h2>Transaction Overview</h2>
@@ -213,6 +260,13 @@ export default function Home() {
             </div>
           )}
         </>
+      )}
+
+      {chainType === "hypercore" && hyperCoreTx && (
+        <div className="results-section">
+          <h2>HyperCore Transaction Details</h2>
+          <HyperCoreTransactionInfo txDetails={hyperCoreTx} />
+        </div>
       )}
     </div>
   );
