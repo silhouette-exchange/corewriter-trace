@@ -112,7 +112,7 @@ export default function Home() {
       const transport = new hl.HttpTransport({
         isTestnet: network === "testnet"
       });
-      const client = new hl.PublicClient({ transport });
+      const client = new hl.InfoClient({ transport });
 
       const result = await client.txDetails({ hash: tx as `0x${string}` });
       setHyperCoreTx(result.tx);
