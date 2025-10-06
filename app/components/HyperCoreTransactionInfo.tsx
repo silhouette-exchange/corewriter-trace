@@ -1,9 +1,9 @@
 'use client'
 
-import type { TxDetails } from "@nktkas/hyperliquid";
+import * as hl from "@nktkas/hyperliquid";
 
 interface HyperCoreTransactionInfoProps {
-  txDetails: TxDetails;
+  txDetails: hl.TxDetails;
 }
 
 export function HyperCoreTransactionInfo({ txDetails }: HyperCoreTransactionInfoProps) {
@@ -62,4 +62,3 @@ export function HyperCoreTransactionInfo({ txDetails }: HyperCoreTransactionInfo
     </div>
   );
 }
-

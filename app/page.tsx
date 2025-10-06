@@ -7,7 +7,7 @@ import { AllLogs } from "./components/AllLogs";
 import { HyperCoreTransactionInfo } from "./components/HyperCoreTransactionInfo";
 import { JsonRpcProvider, Log, Interface, TransactionResponse, TransactionReceipt, Block } from "ethers";
 import { CORE_WRITER_ADDRESS } from "../constants/addresses";
-import { HttpTransport, PublicClient, type TxDetails } from "@nktkas/hyperliquid";
+import * as hl from "@nktkas/hyperliquid";
 
 const MAINNET_RPC = "https://rpc.purroofgroup.com";
 const TESTNET_RPC = "https://rpc.hyperliquid-testnet.xyz/evm";
@@ -30,7 +30,7 @@ export default function Home() {
   const [receipt, setReceipt] = useState<TransactionReceipt | null>(null);
   const [block, setBlock] = useState<Block | null>(null);
   const [logs, setLogs] = useState<Array<Log>>([]);
-  const [hyperCoreTx, setHyperCoreTx] = useState<TxDetails | null>(null);
+  const [hyperCoreTx, setHyperCoreTx] = useState<hl.TxDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
@@ -109,12 +109,10 @@ export default function Home() {
 
   const loadHyperCore = useCallback(async (tx: string) => {
     try {
-      const transport = new HttpTransport({
-        url: network === "testnet" 
-          ? "https://api.hyperliquid-testnet.xyz"
-          : "https://api.hyperliquid.xyz"
+      const transport = new hl.HttpTransport({
+        isTestnet: network === "testnet"
       });
-      const client = new PublicClient({ transport });
+      const client = new hl.PublicClient({ transport });
 
       const result = await client.txDetails({ hash: tx as `0x${string}` });
       setHyperCoreTx(result.tx);
