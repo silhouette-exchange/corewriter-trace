@@ -115,7 +115,7 @@ export default function Home() {
       const client = new hl.InfoClient({ transport });
 
       const result = await client.txDetails({ hash: tx as `0x${string}` });
-      setHyperCoreTx(result.tx);
+      setHyperCoreTx(result);
     } catch (err: any) {
       setError(`Error loading HyperCore transaction: ${err.message || 'Unknown error'}`);
     } finally {
