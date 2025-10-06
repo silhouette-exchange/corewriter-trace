@@ -1,6 +1,6 @@
 import { Log } from "ethers";
 import { useState } from "react";
-import { CORE_WRITER_ADDRESS } from "../../constants/addresses";
+import { CORE_WRITER_ADDRESS } from "../../../constants/addresses";
 
 interface AllLogsProps {
   logs: Log[];
