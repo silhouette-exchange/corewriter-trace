@@ -700,6 +700,20 @@ code {
   color: #2563eb;
 }
 
+/* Button-specific styles for clickable addresses */
+button.clickable-address {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+}
+
+button.clickable-address:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -905,16 +919,19 @@ code {
 }
 
 .position-row span:last-child {
-  color: #1f2937;
   font-weight: 600;
   font-family: 'Monaco', 'Courier New', monospace;
 }
 
-.position-row .positive {
+.position-row span:last-child:not(.positive):not(.negative) {
+  color: #1f2937;
+}
+
+.position-row span:last-child.positive {
   color: #059669;
 }
 
-.position-row .negative {
+.position-row span:last-child.negative {
   color: #dc2626;
 }
 

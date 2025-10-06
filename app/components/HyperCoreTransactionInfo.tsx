@@ -67,13 +67,15 @@ export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTran
 
         <div className="info-row">
           <span className="info-label">User:</span>
-          <span 
+          <button 
+            type="button"
             className="info-value hash-value clickable-address" 
             onClick={() => setShowBalanceModal(true)}
             title="Click to view balance"
+            aria-label="View account balance for this address"
           >
             {txDetails.user}
-          </span>
+          </button>
         </div>
 
         <div className="info-row">
