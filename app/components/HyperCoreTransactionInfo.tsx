@@ -2,8 +2,21 @@
 
 import * as hl from "@nktkas/hyperliquid";
 
+// Define the transaction details type based on the API response structure
+interface TxDetails {
+  action: {
+    type: string;
+    [key: string]: unknown;
+  };
+  block: number;
+  error: string | null;
+  hash: string;
+  time: number;
+  user: string;
+}
+
 interface HyperCoreTransactionInfoProps {
-  txDetails: hl.TxDetails;
+  txDetails: TxDetails;
 }
 
 // Helper function to format order data into human-readable format

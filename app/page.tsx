@@ -9,6 +9,19 @@ import { JsonRpcProvider, Log, Interface, TransactionResponse, TransactionReceip
 import { CORE_WRITER_ADDRESS } from "../constants/addresses";
 import * as hl from "@nktkas/hyperliquid";
 
+// Define the transaction details type based on the API response structure
+interface TxDetails {
+  action: {
+    type: string;
+    [key: string]: unknown;
+  };
+  block: number;
+  error: string | null;
+  hash: string;
+  time: number;
+  user: string;
+}
+
 const MAINNET_RPC = "https://rpc.purroofgroup.com";
 const TESTNET_RPC = "https://rpc.hyperliquid-testnet.xyz/evm";
 
@@ -30,7 +43,7 @@ export default function Home() {
   const [receipt, setReceipt] = useState<TransactionReceipt | null>(null);
   const [block, setBlock] = useState<Block | null>(null);
   const [logs, setLogs] = useState<Array<Log>>([]);
-  const [hyperCoreTx, setHyperCoreTx] = useState<hl.TxDetails | null>(null);
+  const [hyperCoreTx, setHyperCoreTx] = useState<TxDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
@@ -115,7 +128,7 @@ export default function Home() {
       const client = new hl.InfoClient({ transport });
 
       const result = await client.txDetails({ hash: tx as `0x${string}` });
-      setHyperCoreTx(result);
+      setHyperCoreTx(result.tx);
     } catch (err: any) {
       setError(`Error loading HyperCore transaction: ${err.message || 'Unknown error'}`);
     } finally {
@@ -235,7 +248,7 @@ export default function Home() {
           </div>
 
           <div className="results-section">
-            <AllLogs logs={receipt.logs} />
+            <AllLogs logs={[...receipt.logs]} />
           </div>
 
           {logs.length > 0 && (
