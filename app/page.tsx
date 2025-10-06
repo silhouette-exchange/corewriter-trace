@@ -39,8 +39,12 @@ export default function Home() {
   );
   const [hyperCoreTxHash, setHyperCoreTxHash] = useState<string>("");
   
-  const [network, setNetwork] = useState<Network>("mainnet");
-  const [customRpc, setCustomRpc] = useState<string>("");
+  // Separate network settings for each chain type
+  const [hyperEvmNetwork, setHyperEvmNetwork] = useState<Network>("mainnet");
+  const [hyperCoreNetwork, setHyperCoreNetwork] = useState<Network>("mainnet");
+  const [hyperEvmCustomRpc, setHyperEvmCustomRpc] = useState<string>("");
+  const [hyperCoreCustomRpc, setHyperCoreCustomRpc] = useState<string>("");
+  
   const [chainType, setChainType] = useState<ChainType>("hyperevm");
   
   // Separate results for HyperEVM (L2)
@@ -58,10 +62,12 @@ export default function Home() {
 
   const provider = useMemo(() => {
     let rpcUrl: string;
+    const currentNetwork = chainType === "hyperevm" ? hyperEvmNetwork : hyperCoreNetwork;
+    const currentCustomRpc = chainType === "hyperevm" ? hyperEvmCustomRpc : hyperCoreCustomRpc;
     
-    if (network === "custom") {
-      rpcUrl = customRpc || MAINNET_RPC;
-    } else if (network === "testnet") {
+    if (currentNetwork === "custom") {
+      rpcUrl = currentCustomRpc || MAINNET_RPC;
+    } else if (currentNetwork === "testnet") {
       rpcUrl = TESTNET_RPC;
     } else {
       rpcUrl = MAINNET_RPC;
@@ -70,7 +76,7 @@ export default function Home() {
     return new JsonRpcProvider(rpcUrl, 999, {
       staticNetwork: true,
     });
-  }, [network, customRpc]);
+  }, [chainType, hyperEvmNetwork, hyperCoreNetwork, hyperEvmCustomRpc, hyperCoreCustomRpc]);
 
   const loadHyperEVM = useCallback(async (tx: string) => {
     try {
@@ -132,7 +138,7 @@ export default function Home() {
   const loadHyperCore = useCallback(async (tx: string) => {
     try {
       const transport = new hl.HttpTransport({
-        isTestnet: network === "testnet"
+        isTestnet: hyperCoreNetwork === "testnet"
       });
       const client = new hl.InfoClient({ transport });
 
@@ -143,7 +149,7 @@ export default function Home() {
     } finally {
       setHyperCoreLoading(false);
     }
-  }, [network]);
+  }, [hyperCoreNetwork]);
 
   const load = useCallback(async (tx: string) => {
     if (tx === undefined || tx === "") {
@@ -193,8 +199,15 @@ export default function Home() {
           <label htmlFor="network">Network</label>
           <select
             id="network"
-            value={network}
-            onChange={(e) => setNetwork(e.target.value as Network)}
+            value={chainType === "hyperevm" ? hyperEvmNetwork : hyperCoreNetwork}
+            onChange={(e) => {
+              const newNetwork = e.target.value as Network;
+              if (chainType === "hyperevm") {
+                setHyperEvmNetwork(newNetwork);
+              } else {
+                setHyperCoreNetwork(newNetwork);
+              }
+            }}
             className="select-input"
           >
             <option value="mainnet">Mainnet</option>
@@ -203,14 +216,22 @@ export default function Home() {
           </select>
         </div>
 
-        {network === "custom" && (
+        {((chainType === "hyperevm" && hyperEvmNetwork === "custom") || 
+          (chainType === "hypercore" && hyperCoreNetwork === "custom")) && (
           <div className="form-group">
             <label htmlFor="customRpc">Custom RPC Endpoint</label>
             <input
               id="customRpc"
               type="text"
-              value={customRpc}
-              onChange={(e) => setCustomRpc(e.target.value)}
+              value={chainType === "hyperevm" ? hyperEvmCustomRpc : hyperCoreCustomRpc}
+              onChange={(e) => {
+                const newRpc = e.target.value;
+                if (chainType === "hyperevm") {
+                  setHyperEvmCustomRpc(newRpc);
+                } else {
+                  setHyperCoreCustomRpc(newRpc);
+                }
+              }}
               placeholder="https://your-rpc-endpoint.com"
               className="text-input"
             />
