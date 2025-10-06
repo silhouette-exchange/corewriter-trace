@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react';
 import * as hl from "@nktkas/hyperliquid";
+import { AccountBalanceModal } from './AccountBalanceModal';
 
 // Define the transaction details type based on the API response structure
 interface TxDetails {
@@ -17,6 +19,7 @@ interface TxDetails {
 
 interface HyperCoreTransactionInfoProps {
   txDetails: TxDetails;
+  isTestnet: boolean;
 }
 
 // Helper function to format order data into human-readable format
@@ -51,7 +54,9 @@ function formatOrderAction(actionData: any) {
   };
 }
 
-export function HyperCoreTransactionInfo({ txDetails }: HyperCoreTransactionInfoProps) {
+export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTransactionInfoProps) {
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+
   return (
     <div className="transaction-info">
       <div className="info-grid">
@@ -62,7 +67,15 @@ export function HyperCoreTransactionInfo({ txDetails }: HyperCoreTransactionInfo
 
         <div className="info-row">
           <span className="info-label">User:</span>
-          <span className="info-value hash-value">{txDetails.user}</span>
+          <button 
+            type="button"
+            className="info-value hash-value clickable-address" 
+            onClick={() => setShowBalanceModal(true)}
+            title="Click to view balance"
+            aria-label="View account balance for this address"
+          >
+            {txDetails.user}
+          </button>
         </div>
 
         <div className="info-row">
@@ -106,6 +119,14 @@ export function HyperCoreTransactionInfo({ txDetails }: HyperCoreTransactionInfo
           </div>
         )}
       </div>
+
+      {showBalanceModal && (
+        <AccountBalanceModal 
+          address={txDetails.user}
+          isTestnet={isTestnet}
+          onClose={() => setShowBalanceModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -317,7 +317,10 @@ export default function Home() {
       {chainType === "hypercore" && hyperCoreTx && (
         <div className="results-section">
           <h2>HyperCore Transaction Details</h2>
-          <HyperCoreTransactionInfo txDetails={hyperCoreTx} />
+          <HyperCoreTransactionInfo 
+            txDetails={hyperCoreTx} 
+            isTestnet={hyperCoreNetwork === "testnet"}
+          />
         </div>
       )}
     </div>
