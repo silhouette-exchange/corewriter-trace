@@ -2,7 +2,10 @@
 
 import { useCallback, useState, useMemo } from "react";
 import { CoreWriterActionLog } from "./components/CoreWriterActionLog";
-import { JsonRpcProvider, Log, Interface } from "ethers";
+import { TransactionInfo } from "./components/TransactionInfo";
+import { AllLogs } from "./components/AllLogs";
+import { JsonRpcProvider, Log, Interface, TransactionResponse, TransactionReceipt, Block } from "ethers";
+import { CORE_WRITER_ADDRESS } from "../constants/addresses";
 
 const MAINNET_RPC = "https://rpc.purroofgroup.com";
 const TESTNET_RPC = "https://rpc.hyperliquid-testnet.xyz/evm";
@@ -19,6 +22,9 @@ export default function Home() {
   );
   const [network, setNetwork] = useState<Network>("mainnet");
   const [customRpc, setCustomRpc] = useState<string>("");
+  const [transaction, setTransaction] = useState<TransactionResponse | null>(null);
+  const [receipt, setReceipt] = useState<TransactionReceipt | null>(null);
+  const [block, setBlock] = useState<Block | null>(null);
   const [logs, setLogs] = useState<Array<Log>>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -39,8 +45,11 @@ export default function Home() {
     });
   }, [network, customRpc]);
 
-  const load = useCallback((tx: string) => {
+  const load = useCallback(async (tx: string) => {
     setLogs([]);
+    setTransaction(null);
+    setReceipt(null);
+    setBlock(null);
     setError("");
 
     if (tx === undefined || tx === "") {
@@ -49,36 +58,67 @@ export default function Home() {
 
     setLoading(true);
 
-    provider.getTransactionReceipt(tx)
-      .then((result) => {
-        if (!result) {
-          setError("Transaction not found");
-          return;
+    try {
+      // Fetch transaction receipt
+      const receiptResult = await provider.getTransactionReceipt(tx);
+      if (!receiptResult) {
+        setError("Transaction not found");
+        setLoading(false);
+        return;
+      }
+      setReceipt(receiptResult);
+
+      // Fetch transaction details
+      const transactionResult = await provider.getTransaction(tx);
+      if (!transactionResult) {
+        setError("Transaction details not found");
+        setLoading(false);
+        return;
+      }
+      setTransaction(transactionResult);
+
+      // Fetch block information
+      if (transactionResult.blockNumber) {
+        try {
+          const blockResult = await provider.getBlock(transactionResult.blockNumber);
+          setBlock(blockResult);
+        } catch (err) {
+          console.warn("Could not fetch block information:", err);
         }
+      }
 
-        const logs =
-          result?.logs.filter(
-            (log) =>
-              log.address === "0x3333333333333333333333333333333333333333"
-          ) ?? [];
+      // Filter CoreWriter logs
+      const coreWriterLogs =
+        receiptResult?.logs.filter(
+          (log) =>
+            log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase()
+        ) ?? [];
 
-        if (logs.length === 0) {
-          setError("No CoreWriter actions found in this transaction");
-        }
+      setLogs(coreWriterLogs);
 
-        setLogs(logs);
-      })
-      .catch((err) => {
+      if (coreWriterLogs.length === 0) {
+        console.log("No CoreWriter actions found in this transaction");
+      }
+    } catch (err: any) {
+      if (err.code === 'NETWORK_ERROR') {
+        setError('Network error: Please check your connection and try again.');
+      } else if (err.code === 'INVALID_ARGUMENT') {
+        setError('Invalid transaction hash format.');
+      } else if (err.code === 'SERVER_ERROR') {
+        setError('RPC server error: Please try again later.');
+      } else {
         setError(`Error loading transaction: ${err.message}`);
-      })
-      .finally(() => setLoading(false));
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [provider]);
 
   return (
     <div className="App">
       <div className="header">
         <h1>CoreWriter Trace</h1>
-        <p className="subtitle">Decode Hyperliquid CoreWriter actions from transaction logs</p>
+        <p className="subtitle">View comprehensive transaction information and decode CoreWriter actions</p>
       </div>
 
       <div className="config-section">
@@ -138,23 +178,42 @@ export default function Home() {
         </div>
       )}
 
-      {logs.length > 0 && (
-        <div className="results-section">
-          <h2>CoreWriter Actions ({logs.length})</h2>
-          {logs.map((log, index) => (
-            <CoreWriterActionLog
-              key={index}
-              data={
-                CORE_WRITER.decodeEventLog(
-                  CORE_WRITER.getEvent("RawAction")!,
-                  log.data
-                )[1]
-              }
+      {transaction && receipt && (
+        <>
+          <div className="results-section">
+            <h2>Transaction Overview</h2>
+            <TransactionInfo 
+              transaction={transaction} 
+              receipt={receipt} 
+              block={block}
             />
-          ))}
-        </div>
+          </div>
+
+          <div className="results-section">
+            <AllLogs logs={receipt.logs} />
+          </div>
+
+          {logs.length > 0 && (
+            <div className="results-section">
+              <h2>CoreWriter Actions ({logs.length})</h2>
+              <div className="corewriter-actions">
+                {logs.map((log, index) => (
+                  <CoreWriterActionLog
+                    key={index}
+                    data={
+                      CORE_WRITER.decodeEventLog(
+                        CORE_WRITER.getEvent("RawAction")!,
+                        log.data,
+                        log.topics
+                      )[1]
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 }
-
