@@ -8,6 +8,7 @@ import { HyperCoreTransactionInfo } from "./components/HyperCoreTransactionInfo"
 import { JsonRpcProvider, Log, Interface, TransactionResponse, TransactionReceipt, Block } from "ethers";
 import { CORE_WRITER_ADDRESS } from "../constants/addresses";
 import * as hl from "@nktkas/hyperliquid";
+import { HttpTransportOptions } from "@nktkas/hyperliquid";
 
 // Define the transaction details type based on the API response structure
 interface TxDetails {
@@ -43,7 +44,7 @@ export default function Home() {
   const [hyperEvmNetwork, setHyperEvmNetwork] = useState<Network>("mainnet");
   const [hyperCoreNetwork, setHyperCoreNetwork] = useState<Network>("mainnet");
   const [hyperEvmCustomRpc, setHyperEvmCustomRpc] = useState<string>("");
-  const [hyperCoreCustomRpc, setHyperCoreCustomRpc] = useState<string>("");
+  // Note: HyperCore (L1) doesn't support custom RPC, only mainnet/testnet
   
   const [chainType, setChainType] = useState<ChainType>("hyperevm");
   
@@ -62,8 +63,8 @@ export default function Home() {
 
   const provider = useMemo(() => {
     let rpcUrl: string;
-    const currentNetwork = chainType === "hyperevm" ? hyperEvmNetwork : hyperCoreNetwork;
-    const currentCustomRpc = chainType === "hyperevm" ? hyperEvmCustomRpc : hyperCoreCustomRpc;
+    const currentNetwork = hyperEvmNetwork; // Only used for HyperEVM (L2)
+    const currentCustomRpc = hyperEvmCustomRpc;
     
     if (currentNetwork === "custom") {
       rpcUrl = currentCustomRpc || MAINNET_RPC;
@@ -76,7 +77,7 @@ export default function Home() {
     return new JsonRpcProvider(rpcUrl, 999, {
       staticNetwork: true,
     });
-  }, [chainType, hyperEvmNetwork, hyperCoreNetwork, hyperEvmCustomRpc, hyperCoreCustomRpc]);
+  }, [hyperEvmNetwork, hyperEvmCustomRpc]);
 
   const loadHyperEVM = useCallback(async (tx: string) => {
     try {
@@ -137,23 +138,9 @@ export default function Home() {
 
   const loadHyperCore = useCallback(async (tx: string) => {
     try {
-      // Configure transport with custom RPC if provided
-      const transportConfig: any = {
+      const transportConfig: HttpTransportOptions = {
         isTestnet: hyperCoreNetwork === "testnet"
       };
-
-      // Add custom URL if using custom network and URL is provided
-      if (hyperCoreNetwork === "custom" && hyperCoreCustomRpc) {
-        try {
-          // Validate URL format
-          new URL(hyperCoreCustomRpc);
-          transportConfig.baseUrl = hyperCoreCustomRpc;
-        } catch (urlError) {
-          // If custom URL is invalid, fall back to default and show warning
-          console.warn(`Invalid custom RPC URL: ${hyperCoreCustomRpc}, falling back to mainnet`);
-          setHyperCoreError(`Invalid custom RPC URL format. Using mainnet instead.`);
-        }
-      }
 
       const transport = new hl.HttpTransport(transportConfig);
       const client = new hl.InfoClient({ transport });
@@ -165,7 +152,7 @@ export default function Home() {
     } finally {
       setHyperCoreLoading(false);
     }
-  }, [hyperCoreNetwork, hyperCoreCustomRpc]);
+  }, [hyperCoreNetwork]);
 
   const load = useCallback(async (tx: string) => {
     if (tx === undefined || tx === "") {
@@ -228,26 +215,18 @@ export default function Home() {
           >
             <option value="mainnet">Mainnet</option>
             <option value="testnet">Testnet</option>
-            <option value="custom">Custom RPC</option>
+            {chainType === "hyperevm" && <option value="custom">Custom RPC</option>}
           </select>
         </div>
 
-        {((chainType === "hyperevm" && hyperEvmNetwork === "custom") || 
-          (chainType === "hypercore" && hyperCoreNetwork === "custom")) && (
+        {chainType === "hyperevm" && hyperEvmNetwork === "custom" && (
           <div className="form-group">
             <label htmlFor="customRpc">Custom RPC Endpoint</label>
             <input
               id="customRpc"
               type="text"
-              value={chainType === "hyperevm" ? hyperEvmCustomRpc : hyperCoreCustomRpc}
-              onChange={(e) => {
-                const newRpc = e.target.value;
-                if (chainType === "hyperevm") {
-                  setHyperEvmCustomRpc(newRpc);
-                } else {
-                  setHyperCoreCustomRpc(newRpc);
-                }
-              }}
+              value={hyperEvmCustomRpc}
+              onChange={(e) => setHyperEvmCustomRpc(e.target.value)}
               placeholder="https://your-rpc-endpoint.com"
               className="text-input"
             />
