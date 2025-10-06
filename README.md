@@ -22,7 +22,7 @@ A modern Next.js application for decoding Hyperliquid CoreWriter actions from tr
 ### Prerequisites
 
 - **Node.js**: 18.18.0 or higher (or active LTS 20+ recommended)
-- **pnpm**: 8.0.0 or higher (recommended package manager)
+- **pnpm**: 9.15.0 or higher (**required** - this project uses pnpm)
 
 ### Installation
 
@@ -31,15 +31,14 @@ A modern Next.js application for decoding Hyperliquid CoreWriter actions from tr
 git clone https://github.com/silhouette-exchange/corewriter-trace.git
 cd corewriter-trace
 
-# Install dependencies with pnpm (recommended)
+# Install dependencies with pnpm (preferred)
 pnpm install
 
-# Or with npm
+# Alternatively, you can use npm if needed
 npm install
-
-# Or with yarn
-yarn install
 ```
+
+> **Note**: This project uses **pnpm** as the preferred package manager. While npm will work, pnpm provides better performance and disk space efficiency. The `package-lock.json` file is gitignored in favor of `pnpm-lock.yaml`.
 
 ### Development
 

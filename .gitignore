@@ -10,6 +10,9 @@
 .pnpm-debug.log*
 .pnpm-store/
 
+# npm (pnpm is preferred)
+package-lock.json
+
 # testing
 /coverage
 
