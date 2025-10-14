@@ -689,15 +689,17 @@ code {
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  color: #3b82f6;
+  text-decoration: none;
 }
 
 .clickable-address:hover {
-  color: #3b82f6;
+  color: #2563eb;
   text-decoration: underline;
 }
 
 .clickable-address:active {
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 /* Button-specific styles for clickable addresses */
@@ -710,6 +712,35 @@ button.clickable-address {
 }
 
 button.clickable-address:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Balance Button */
+.balance-button {
+  margin-left: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.balance-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.balance-button:active {
+  transform: translateY(1px);
+}
+
+.balance-button:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
@@ -1049,5 +1080,298 @@ button.clickable-address:focus {
 
   .position-row {
     font-size: 0.85rem;
+  }
+}
+
+/* Account Details Page Styles */
+.account-header {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.account-address-display {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.account-address-value {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  word-break: break-all;
+}
+
+.network-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.network-selector label {
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.network-selector .select-input {
+  min-width: 150px;
+}
+
+.account-panes-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.account-pane {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pane-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.account-section {
+  margin-bottom: 2rem;
+}
+
+.account-section:last-child {
+  margin-bottom: 0;
+}
+
+.account-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.balance-display {
+  margin-top: 1rem;
+}
+
+.balance-card {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.balance-card .balance-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.balance-card .balance-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Transaction List Styles */
+.transactions-list {
+  margin-top: 1rem;
+}
+
+.transactions-table {
+  background: #f9fafb;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.transaction-table-header,
+.transaction-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  align-items: center;
+}
+
+.transaction-table-header {
+  background: #374151;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.transaction-table-row {
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.transaction-table-row:last-child {
+  border-bottom: none;
+}
+
+.transaction-table-row:hover {
+  background: #f3f4f6;
+}
+
+.transaction-hash {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.transaction-hash a {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.transaction-hash a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.corewriter-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.transaction-type,
+.transaction-method {
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.transaction-coin {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.transaction-side {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.transaction-side.buy {
+  color: #059669;
+}
+
+.transaction-side.sell {
+  color: #dc2626;
+}
+
+.transaction-size,
+.transaction-price {
+  font-family: 'Monaco', 'Courier New', monospace;
+  color: #1f2937;
+}
+
+.transaction-block {
+  color: #6b7280;
+}
+
+.transaction-age {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+.load-more-button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 2px solid #dbeafe;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.load-more-button:hover {
+  background: #dbeafe;
+  border-color: #bfdbfe;
+}
+
+.load-more-button:active {
+  transform: translateY(1px);
+}
+
+/* Responsive Account Details */
+@media (max-width: 1024px) {
+  .account-panes-container {
+    grid-template-columns: 1fr;
+  }
+
+  .account-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .account-address-display {
+    min-width: 100%;
+  }
+
+  .network-selector {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .account-pane {
+    padding: 1.5rem;
+  }
+
+  .pane-title {
+    font-size: 1.25rem;
+  }
+
+  .balance-card .balance-amount {
+    font-size: 1.5rem;
+  }
+
+  .transaction-table-header,
+  .transaction-table-row {
+    grid-template-columns: 2fr 1fr 1fr;
+    font-size: 0.8rem;
+  }
+
+  .transaction-table-header span:nth-child(2),
+  .transaction-table-row .transaction-method,
+  .transaction-table-row .transaction-type {
+    display: none;
   }
 }

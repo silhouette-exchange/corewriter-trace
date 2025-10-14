@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import * as hl from "@nktkas/hyperliquid";
+import Link from 'next/link';
 import { AccountBalanceModal } from './AccountBalanceModal';
 
 // Define the transaction details type based on the API response structure
@@ -67,15 +68,21 @@ export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTran
 
         <div className="info-row">
           <span className="info-label">User:</span>
-          <button 
-            type="button"
-            className="info-value hash-value clickable-address" 
-            onClick={() => setShowBalanceModal(true)}
-            title="Click to view balance"
-            aria-label="View account balance for this address"
-          >
-            {txDetails.user}
-          </button>
+          <span className="info-value hash-value">
+            <Link href={`/account?address=${txDetails.user}`} className="clickable-address">
+              {txDetails.user}
+            </Link>
+            {' '}
+            <button 
+              type="button"
+              className="balance-button" 
+              onClick={() => setShowBalanceModal(true)}
+              title="View balance details"
+              aria-label="View account balance for this address"
+            >
+              View Balance
+            </button>
+          </span>
         </div>
 
         <div className="info-row">

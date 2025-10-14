@@ -1,5 +1,6 @@
 import { TransactionResponse, TransactionReceipt, Block, formatEther } from "ethers";
 import { useCallback, useMemo } from "react";
+import Link from 'next/link';
 
 interface TransactionInfoProps {
   transaction: TransactionResponse;
@@ -70,13 +71,25 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
             <tr>
               <td className="info-label">From:</td>
               <td className="info-value">
-                <code>{transaction.from}</code>
+                <code>
+                  <Link href={`/account?address=${transaction.from}`} className="clickable-address">
+                    {transaction.from}
+                  </Link>
+                </code>
               </td>
             </tr>
             <tr>
               <td className="info-label">To:</td>
               <td className="info-value">
-                <code>{transaction.to || "Contract Creation"}</code>
+                <code>
+                  {transaction.to ? (
+                    <Link href={`/account?address=${transaction.to}`} className="clickable-address">
+                      {transaction.to}
+                    </Link>
+                  ) : (
+                    "Contract Creation"
+                  )}
+                </code>
               </td>
             </tr>
             <tr>
