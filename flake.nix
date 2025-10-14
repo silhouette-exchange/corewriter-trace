@@ -20,7 +20,7 @@
         # Add the packages required by your project's README.
         buildInputs = [
           # The README recommends Node.js 20+ and pnpm 9.15+
-          pkgs.nodejs-20_x  # Provides Node.js and npm
+          pkgs.nodejs_20    # Provides Node.js and npm
           pkgs.pnpm         # Provides pnpm
         ];
       };
