@@ -1330,6 +1330,55 @@ button.clickable-address:focus {
   transform: translateY(1px);
 }
 
+/* Feature Unavailable Message */
+.feature-unavailable {
+  background: #fffbeb;
+  border: 2px solid #fcd34d;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.feature-unavailable-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature-unavailable h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0 0 1rem 0;
+}
+
+.feature-unavailable p {
+  color: #78350f;
+  line-height: 1.6;
+  margin: 0.75rem 0;
+}
+
+.feature-unavailable-note {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #fde047;
+  font-size: 0.9rem;
+}
+
+.feature-unavailable-note strong {
+  color: #92400e;
+}
+
+.feature-unavailable-note a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.feature-unavailable-note a:hover {
+  color: #1d4ed8;
+}
+
 /* Responsive Account Details */
 @media (max-width: 1024px) {
   .account-panes-container {
