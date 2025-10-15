@@ -15,7 +15,7 @@ interface UserDetail {
     [key: string]: any;
   };
   block: number;
-  error?: string;
+  error: string | null;
   hash: string;
   time: number;
   user: string;
@@ -44,12 +44,13 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
         // Fetch user details (all actions)
         const result = await client.userDetails({ user: address as `0x${string}` });
         
-        // Store all transactions
-        setAllTransactions(result);
+        // Store all transactions (userDetails returns an object with txs property)
+        const txs = result.txs || [];
+        setAllTransactions(txs);
         // Take the first 25 items
-        const firstBatch = result.slice(0, 25);
+        const firstBatch = txs.slice(0, 25);
         setTransactions(firstBatch);
-        setHasMore(result.length > 25);
+        setHasMore(txs.length > 25);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown error';
         setError(`Error loading transactions: ${message}`);
