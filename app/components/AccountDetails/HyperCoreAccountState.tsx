@@ -70,7 +70,7 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
   const [spotBalances, setSpotBalances] = useState<SpotClearinghouseState | null>(null);
   const [perpState, setPerpState] = useState<ClearinghouseState | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -93,8 +93,9 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
 
         setSpotBalances(spotResult);
         setPerpState(perpResult);
-      } catch (err: any) {
-        setError(`Error loading balances: ${err.message || 'Unknown error'}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        setError(`Error loading balances: ${message}`);
       } finally {
         setLoading(false);
       }
@@ -144,19 +145,22 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
             {perpState.assetPositions.length > 0 && (
               <div className="positions-section">
                 <h4>Open Positions ({perpState.assetPositions.length})</h4>
-                {perpState.assetPositions.map((position, idx) => (
-                  <div key={idx} className="position-card">
-                    <div className="position-header">
-                      <span className="position-coin">{position.position.coin}</span>
-                      <span className={`position-side ${parseFloat(position.position.szi) > 0 ? 'long' : 'short'}`}>
-                        {parseFloat(position.position.szi) > 0 ? 'LONG' : 'SHORT'}
-                      </span>
-                    </div>
-                    <div className="position-details">
-                      <div className="position-row">
-                        <span>Size:</span>
-                        <span>{Math.abs(parseFloat(position.position.szi)).toFixed(4)}</span>
+                {perpState.assetPositions.map((position, idx) => {
+                  const size = parseFloat(position.position.szi);
+                  const isLong = size > 0;
+                  return (
+                    <div key={idx} className="position-card">
+                      <div className="position-header">
+                        <span className="position-coin">{position.position.coin}</span>
+                        <span className={`position-side ${isLong ? 'long' : 'short'}`}>
+                          {isLong ? 'LONG' : 'SHORT'}
+                        </span>
                       </div>
+                      <div className="position-details">
+                        <div className="position-row">
+                          <span>Size:</span>
+                          <span>{Math.abs(size).toFixed(4)}</span>
+                        </div>
                       <div className="position-row">
                         <span>Entry Price:</span>
                         <span>${position.position.entryPx}</span>
@@ -183,7 +187,8 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -208,6 +213,18 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
             {spotBalances.balances.map((balance, idx) => {
               const total = parseFloat(balance.total);
               const hold = parseFloat(balance.hold);
+              
+              if (isNaN(total) || isNaN(hold)) {
+                return (
+                  <div key={idx} className="balance-table-row">
+                    <span className="asset-name">{balance.coin}</span>
+                    <span className="error-value">Invalid data</span>
+                    <span className="error-value">Invalid data</span>
+                    <span className="error-value">Invalid data</span>
+                  </div>
+                );
+              }
+              
               const available = total - hold;
               
               return (

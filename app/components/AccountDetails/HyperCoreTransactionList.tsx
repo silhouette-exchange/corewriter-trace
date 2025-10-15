@@ -28,8 +28,9 @@ interface UserFill {
 
 export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransactionListProps) {
   const [transactions, setTransactions] = useState<UserFill[]>([]);
+  const [allTransactions, setAllTransactions] = useState<UserFill[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
@@ -48,12 +49,15 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
         // Fetch user fills (trades/actions)
         const result = await client.userFills({ user: address as `0x${string}` });
         
+        // Store all transactions
+        setAllTransactions(result);
         // Take the first 25 items
         const firstBatch = result.slice(0, 25);
         setTransactions(firstBatch);
         setHasMore(result.length > 25);
-      } catch (err: any) {
-        setError(`Error loading transactions: ${err.message || 'Unknown error'}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        setError(`Error loading transactions: ${message}`);
       } finally {
         setLoading(false);
       }
@@ -62,24 +66,11 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
     fetchTransactions();
   }, [address, isTestnet]);
 
-  const loadMore = async () => {
-    try {
-      const transportConfig: hl.HttpTransportOptions = {
-        isTestnet
-      };
-
-      const transport = new hl.HttpTransport(transportConfig);
-      const client = new hl.InfoClient({ transport });
-
-      const result = await client.userFills({ user: address as `0x${string}` });
-      
-      // Load next batch
-      const nextBatch = result.slice(transactions.length, transactions.length + 25);
-      setTransactions([...transactions, ...nextBatch]);
-      setHasMore(result.length > transactions.length + nextBatch.length);
-    } catch (err: any) {
-      setError(`Error loading more transactions: ${err.message || 'Unknown error'}`);
-    }
+  const loadMore = () => {
+    // Load next batch from cached data
+    const nextBatch = allTransactions.slice(transactions.length, transactions.length + 25);
+    setTransactions([...transactions, ...nextBatch]);
+    setHasMore(allTransactions.length > transactions.length + nextBatch.length);
   };
 
   const formatTimestamp = (timestamp: number) => {
