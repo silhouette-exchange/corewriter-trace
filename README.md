@@ -74,6 +74,7 @@ npx serve out/
 ### Example Transaction
 
 Try this sample transaction hash on Mainnet:
+
 ```text
 0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e
 ```
@@ -156,12 +157,12 @@ The app is configured for static export in `next.config.js`:
 
 ```javascript
 const nextConfig = {
-  output: 'export',        // Static export
-  trailingSlash: true,     // Add trailing slashes
+  output: 'export', // Static export
+  trailingSlash: true, // Add trailing slashes
   images: {
-    unoptimized: true      // Disable image optimization for static export
-  }
-}
+    unoptimized: true, // Disable image optimization for static export
+  },
+};
 ```
 
 ### TypeScript Configuration
@@ -183,8 +184,8 @@ Optimized for Next.js with modern features:
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [{"name": "next"}],
-    "paths": {"@/*": ["./*"]}
+    "plugins": [{ "name": "next" }],
+    "paths": { "@/*": ["./*"] }
   }
 }
 ```

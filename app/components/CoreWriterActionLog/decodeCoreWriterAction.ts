@@ -1,4 +1,4 @@
-import { AbiCoder } from "ethers";
+import { AbiCoder } from 'ethers';
 
 const ABI = AbiCoder.defaultAbiCoder();
 
@@ -7,7 +7,7 @@ type Action<type = string> = {
   type: type;
 };
 
-type LimitOrderAction = Action<"limitOrder"> & {
+type LimitOrderAction = Action<'limitOrder'> & {
   data: {
     asset: number;
     isBuy: boolean;
@@ -15,11 +15,11 @@ type LimitOrderAction = Action<"limitOrder"> & {
     sz: number;
     reduceOnly: boolean;
     encodedTif: number;
-    cloid: BigInt;
+    cloid: bigint;
   };
 };
 
-type VaultTransferAction = Action<"vaultTransfer"> & {
+type VaultTransferAction = Action<'vaultTransfer'> & {
   data: {
     vault: string;
     isDeposit: boolean;
@@ -27,7 +27,7 @@ type VaultTransferAction = Action<"vaultTransfer"> & {
   };
 };
 
-type TokenDelegateAction = Action<"tokenDelegate"> & {
+type TokenDelegateAction = Action<'tokenDelegate'> & {
   data: {
     validator: string;
     wei: number;
@@ -35,19 +35,19 @@ type TokenDelegateAction = Action<"tokenDelegate"> & {
   };
 };
 
-type StakingDepositAction = Action<"stakingDeposit"> & {
+type StakingDepositAction = Action<'stakingDeposit'> & {
   data: {
     wei: number;
   };
 };
 
-type StakingWithdrawAction = Action<"stakingWithdraw"> & {
+type StakingWithdrawAction = Action<'stakingWithdraw'> & {
   data: {
     wei: number;
   };
 };
 
-type SpotSendAction = Action<"spotSend"> & {
+type SpotSendAction = Action<'spotSend'> & {
   data: {
     destination: string;
     token: number;
@@ -55,28 +55,28 @@ type SpotSendAction = Action<"spotSend"> & {
   };
 };
 
-type CancelOrderByOidAction = Action<"cancelOrderByOid"> & {
+type CancelOrderByOidAction = Action<'cancelOrderByOid'> & {
   data: {
     asset: number;
     oid: bigint;
   };
 };
 
-type CancelOrderByCloidAction = Action<"cancelOrderByCloid"> & {
+type CancelOrderByCloidAction = Action<'cancelOrderByCloid'> & {
   data: {
     asset: number;
     cloid: bigint;
   };
 };
 
-type UsdClassTransferAction = Action<"usdClassTransfer"> & {
+type UsdClassTransferAction = Action<'usdClassTransfer'> & {
   data: {
     ntl: number;
     toPerp: boolean;
   };
 };
 
-type SendAssetAction = Action<"sendAsset"> & {
+type SendAssetAction = Action<'sendAsset'> & {
   data: {
     destination: string;
     subAccount: string;
@@ -87,7 +87,7 @@ type SendAssetAction = Action<"sendAsset"> & {
   };
 };
 
-type UnknownAction = Action<"unknown"> & {
+type UnknownAction = Action<'unknown'> & {
   data: {
     data: string;
   };
@@ -106,22 +106,22 @@ type CoreWriterAction =
   | SendAssetAction
   | UnknownAction;
 
-const decodeLimitOrder = (data: string): Omit<LimitOrderAction, "version"> => {
+const decodeLimitOrder = (data: string): Omit<LimitOrderAction, 'version'> => {
   const result = ABI.decode(
     [
-      "uint32 asset",
-      "bool isBuy",
-      "uint64 limitPx",
-      "uint64 sz",
-      "bool reduceOnly",
-      "uint8 encodedTif",
-      "uint128 cloid",
+      'uint32 asset',
+      'bool isBuy',
+      'uint64 limitPx',
+      'uint64 sz',
+      'bool reduceOnly',
+      'uint8 encodedTif',
+      'uint128 cloid',
     ],
     `0x${data}`
   );
 
   return {
-    type: "limitOrder",
+    type: 'limitOrder',
     data: {
       asset: Number(result.asset),
       isBuy: Boolean(result.isBuy),
@@ -136,11 +136,11 @@ const decodeLimitOrder = (data: string): Omit<LimitOrderAction, "version"> => {
 
 const decodeStakingDeposit = (
   data: string
-): Omit<StakingDepositAction, "version"> => {
-  const result = ABI.decode(["uint64 wei"], `0x${data}`);
+): Omit<StakingDepositAction, 'version'> => {
+  const result = ABI.decode(['uint64 wei'], `0x${data}`);
 
   return {
-    type: "stakingDeposit",
+    type: 'stakingDeposit',
     data: {
       wei: Number(result.wei),
     },
@@ -149,14 +149,14 @@ const decodeStakingDeposit = (
 
 const decodeTokenDelegate = (
   data: string
-): Omit<TokenDelegateAction, "version"> => {
+): Omit<TokenDelegateAction, 'version'> => {
   const result = ABI.decode(
-    ["address validator", "uint64 wei", "bool isUndelegate"],
+    ['address validator', 'uint64 wei', 'bool isUndelegate'],
     `0x${data}`
   );
 
   return {
-    type: "tokenDelegate",
+    type: 'tokenDelegate',
     data: {
       validator: result.validator,
       wei: Number(result.wei),
@@ -167,25 +167,25 @@ const decodeTokenDelegate = (
 
 const decodeStakingWithdraw = (
   data: string
-): Omit<StakingWithdrawAction, "version"> => {
-  const result = ABI.decode(["uint64 wei"], `0x${data}`);
+): Omit<StakingWithdrawAction, 'version'> => {
+  const result = ABI.decode(['uint64 wei'], `0x${data}`);
 
   return {
-    type: "stakingWithdraw",
+    type: 'stakingWithdraw',
     data: {
       wei: Number(result.wei),
     },
   };
 };
 
-const decodeSpotSend = (data: string): Omit<SpotSendAction, "version"> => {
+const decodeSpotSend = (data: string): Omit<SpotSendAction, 'version'> => {
   const result = ABI.decode(
-    ["address destination", "uint64 token", "uint64 wei"],
+    ['address destination', 'uint64 token', 'uint64 wei'],
     `0x${data}`
   );
 
   return {
-    type: "spotSend",
+    type: 'spotSend',
     data: {
       destination: result.destination,
       token: Number(result.token),
@@ -196,11 +196,11 @@ const decodeSpotSend = (data: string): Omit<SpotSendAction, "version"> => {
 
 const decodeUsdClassTransfer = (
   data: string
-): Omit<UsdClassTransferAction, "version"> => {
-  const result = ABI.decode(["uint64 ntl", "bool toPerp"], `0x${data}`);
+): Omit<UsdClassTransferAction, 'version'> => {
+  const result = ABI.decode(['uint64 ntl', 'bool toPerp'], `0x${data}`);
 
   return {
-    type: "usdClassTransfer",
+    type: 'usdClassTransfer',
     data: {
       ntl: Number(result.ntl),
       toPerp: result.toPerp,
@@ -210,14 +210,14 @@ const decodeUsdClassTransfer = (
 
 const decodeVaultTransfer = (
   data: string
-): Omit<VaultTransferAction, "version"> => {
+): Omit<VaultTransferAction, 'version'> => {
   const result = ABI.decode(
-    ["address vault", "bool isDeposit", "uint64 usd"],
+    ['address vault', 'bool isDeposit', 'uint64 usd'],
     `0x${data}`
   );
 
   return {
-    type: "vaultTransfer",
+    type: 'vaultTransfer',
     data: {
       vault: result.vault,
       isDeposit: result.isDeposit,
@@ -228,11 +228,11 @@ const decodeVaultTransfer = (
 
 const decodeCancelOrderByOid = (
   data: string
-): Omit<CancelOrderByOidAction, "version"> => {
-  const result = ABI.decode(["uint32 asset", "uint64 oid"], `0x${data}`);
+): Omit<CancelOrderByOidAction, 'version'> => {
+  const result = ABI.decode(['uint32 asset', 'uint64 oid'], `0x${data}`);
 
   return {
-    type: "cancelOrderByOid",
+    type: 'cancelOrderByOid',
     data: {
       asset: Number(result.asset),
       oid: BigInt(result.oid),
@@ -242,11 +242,11 @@ const decodeCancelOrderByOid = (
 
 const decodeCancelOrderByCloid = (
   data: string
-): Omit<CancelOrderByCloidAction, "version"> => {
-  const result = ABI.decode(["uint32 asset", "uint64 cloid"], `0x${data}`);
+): Omit<CancelOrderByCloidAction, 'version'> => {
+  const result = ABI.decode(['uint32 asset', 'uint64 cloid'], `0x${data}`);
 
   return {
-    type: "cancelOrderByCloid",
+    type: 'cancelOrderByCloid',
     data: {
       asset: Number(result.asset),
       cloid: BigInt(result.cloid),
@@ -254,21 +254,21 @@ const decodeCancelOrderByCloid = (
   };
 };
 
-const decodeSendAsset = (data: string): Omit<SendAssetAction, "version"> => {
+const decodeSendAsset = (data: string): Omit<SendAssetAction, 'version'> => {
   const result = ABI.decode(
     [
-      "address destination",
-      "address subAccount",
-      "uint32 source_dex",
-      "uint32 destination_dex",
-      "uint64 token",
-      "uint64 wei",
+      'address destination',
+      'address subAccount',
+      'uint32 source_dex',
+      'uint32 destination_dex',
+      'uint64 token',
+      'uint64 wei',
     ],
     `0x${data}`
   );
 
   return {
-    type: "sendAsset",
+    type: 'sendAsset',
     data: {
       destination: result.destination,
       subAccount: result.subAccount,
@@ -342,7 +342,7 @@ export const decodeCoreWriterAction = (data: string): CoreWriterAction => {
 
   return {
     version,
-    type: "unknown",
+    type: 'unknown',
     data: {
       data: payload,
     },

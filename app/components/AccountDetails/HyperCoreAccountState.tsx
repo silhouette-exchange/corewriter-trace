@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
-import * as hl from "@nktkas/hyperliquid";
+import * as hl from '@nktkas/hyperliquid';
 
 interface HyperCoreAccountStateProps {
   address: string;
@@ -66,11 +66,15 @@ interface SpotClearinghouseState {
   }>;
 }
 
-export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountStateProps) {
-  const [spotBalances, setSpotBalances] = useState<SpotClearinghouseState | null>(null);
+export function HyperCoreAccountState({
+  address,
+  isTestnet,
+}: HyperCoreAccountStateProps) {
+  const [spotBalances, setSpotBalances] =
+    useState<SpotClearinghouseState | null>(null);
   const [perpState, setPerpState] = useState<ClearinghouseState | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -78,15 +82,17 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
     const fetchBalances = async () => {
       try {
         setLoading(true);
-        setError("");
+        setError('');
 
         // Validate address format
         if (!address || !address.match(/^0x[0-9a-fA-F]{40}$/)) {
-          throw new Error('Invalid address format. Address must be a 40-character hex string with 0x prefix.');
+          throw new Error(
+            'Invalid address format. Address must be a 40-character hex string with 0x prefix.'
+          );
         }
 
         const transportConfig: hl.HttpTransportOptions = {
-          isTestnet
+          isTestnet,
         };
 
         const transport = new hl.HttpTransport(transportConfig);
@@ -95,7 +101,7 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
         // Fetch both spot and perpetual balances in parallel
         const [spotResult, perpResult] = await Promise.all([
           client.spotClearinghouseState({ user: address as `0x${string}` }),
-          client.clearinghouseState({ user: address as `0x${string}` })
+          client.clearinghouseState({ user: address as `0x${string}` }),
         ]);
 
         if (mounted) {
@@ -122,15 +128,11 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
   }, [address, isTestnet]);
 
   if (loading) {
-    return (
-      <div className="loading-state">Loading account state...</div>
-    );
+    return <div className="loading-state">Loading account state...</div>;
   }
 
   if (error) {
-    return (
-      <div className="error-message">{error}</div>
-    );
+    return <div className="error-message">{error}</div>;
   }
 
   return (
@@ -143,7 +145,9 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
             <div className="balance-summary">
               <div className="balance-row">
                 <span className="balance-label">Account Value:</span>
-                <span className="balance-value">${perpState.marginSummary.accountValue}</span>
+                <span className="balance-value">
+                  ${perpState.marginSummary.accountValue}
+                </span>
               </div>
               <div className="balance-row">
                 <span className="balance-label">Withdrawable:</span>
@@ -151,11 +155,15 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
               </div>
               <div className="balance-row">
                 <span className="balance-label">Total Margin Used:</span>
-                <span className="balance-value">${perpState.marginSummary.totalMarginUsed}</span>
+                <span className="balance-value">
+                  ${perpState.marginSummary.totalMarginUsed}
+                </span>
               </div>
               <div className="balance-row">
                 <span className="balance-label">Total Position Value:</span>
-                <span className="balance-value">${perpState.marginSummary.totalNtlPos}</span>
+                <span className="balance-value">
+                  ${perpState.marginSummary.totalNtlPos}
+                </span>
               </div>
             </div>
 
@@ -166,25 +174,33 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
                   // Validate and parse position size
                   const sziStr = position.position.szi?.toString().trim();
                   const size = sziStr ? parseFloat(sziStr) : 0;
-                  
+
                   // Guard against invalid numeric values
                   if (!Number.isFinite(size)) {
                     return (
                       <div key={idx} className="position-card">
                         <div className="position-header">
-                          <span className="position-coin">{position.position.coin}</span>
-                          <span className="error-value">Invalid position data</span>
+                          <span className="position-coin">
+                            {position.position.coin}
+                          </span>
+                          <span className="error-value">
+                            Invalid position data
+                          </span>
                         </div>
                       </div>
                     );
                   }
-                  
+
                   const isLong = size > 0;
                   return (
                     <div key={idx} className="position-card">
                       <div className="position-header">
-                        <span className="position-coin">{position.position.coin}</span>
-                        <span className={`position-side ${isLong ? 'long' : 'short'}`}>
+                        <span className="position-coin">
+                          {position.position.coin}
+                        </span>
+                        <span
+                          className={`position-side ${isLong ? 'long' : 'short'}`}
+                        >
                           {isLong ? 'LONG' : 'SHORT'}
                         </span>
                       </div>
@@ -205,31 +221,37 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
                           <span>Unrealized PnL:</span>
                           <span
                             className={
-                              !isNaN(parseFloat(position.position.unrealizedPnl)) &&
+                              !isNaN(
+                                parseFloat(position.position.unrealizedPnl)
+                              ) &&
                               parseFloat(position.position.unrealizedPnl) >= 0
                                 ? 'positive'
                                 : 'negative'
                             }
                           >
-                            ${
-                              !isNaN(parseFloat(position.position.unrealizedPnl))
-                                ? position.position.unrealizedPnl
-                                : 'N/A'
-                            }
+                            $
+                            {!isNaN(parseFloat(position.position.unrealizedPnl))
+                              ? position.position.unrealizedPnl
+                              : 'N/A'}
                           </span>
                         </div>
                         <div className="position-row">
                           <span>Leverage:</span>
-                          <span>{position.position.leverage.value}x ({position.position.leverage.type})</span>
+                          <span>
+                            {position.position.leverage.value}x (
+                            {position.position.leverage.type})
+                          </span>
                         </div>
                         {position.position.liquidationPx && (
                           <div className="position-row">
                             <span>Liquidation Price:</span>
-                            <span className="warning">${position.position.liquidationPx}</span>
+                            <span className="warning">
+                              ${position.position.liquidationPx}
+                            </span>
                           </div>
                         )}
+                      </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>
@@ -256,18 +278,23 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
             {spotBalances.balances.map((balance, idx) => {
               const total = parseFloat(balance.total);
               const hold = parseFloat(balance.hold);
-              
+
               if (isNaN(total) || isNaN(hold)) {
                 return (
-                  <div key={idx} className="balance-table-row balance-error-row">
+                  <div
+                    key={idx}
+                    className="balance-table-row balance-error-row"
+                  >
                     <span className="asset-name">{balance.coin}</span>
-                    <span className="error-value balance-error-message">Invalid balance data</span>
+                    <span className="error-value balance-error-message">
+                      Invalid balance data
+                    </span>
                   </div>
                 );
               }
-              
+
               const available = total - hold;
-              
+
               return (
                 <div key={idx} className="balance-table-row">
                   <span className="asset-name">{balance.coin}</span>
