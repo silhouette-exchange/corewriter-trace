@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 interface UnifiedSearchBarProps {
   value: string;
   onChange: (value: string) => void;
@@ -13,7 +15,7 @@ export function UnifiedSearchBar({
   onSearch,
   loading,
 }: UnifiedSearchBarProps) {
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !loading) {
       onSearch();
     }
@@ -25,11 +27,12 @@ export function UnifiedSearchBar({
       <div className="input-button-group">
         <input
           id="search"
-          type="text"
+          type="search"
           value={value}
           onChange={e => onChange(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder="Enter transaction hash or account address..."
+          aria-label="Search for transaction hash or account address"
           className="text-input"
           disabled={loading}
         />
@@ -44,4 +47,3 @@ export function UnifiedSearchBar({
     </div>
   );
 }
-
