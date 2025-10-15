@@ -73,6 +73,8 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchBalances = async () => {
       try {
         setLoading(true);
@@ -91,17 +93,27 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
           client.clearinghouseState({ user: address as `0x${string}` })
         ]);
 
-        setSpotBalances(spotResult);
-        setPerpState(perpResult);
+        if (mounted) {
+          setSpotBalances(spotResult);
+          setPerpState(perpResult);
+        }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown error';
-        setError(`Error loading balances: ${message}`);
+        if (mounted) {
+          setError(`Error loading balances: ${message}`);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchBalances();
+
+    return () => {
+      mounted = false;
+    };
   }, [address, isTestnet]);
 
   if (loading) {
