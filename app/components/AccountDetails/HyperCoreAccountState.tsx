@@ -158,20 +158,30 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
               <div className="positions-section">
                 <h4>Open Positions ({perpState.assetPositions.length})</h4>
                 {perpState.assetPositions.map((position, idx) => {
-                  const size = parseFloat(position.position.szi);
-                  const isLong = size > 0;
-                  return (
-                    <div key={idx} className="position-card">
-                      <div className="position-header">
-                        <span className="position-coin">{position.position.coin}</span>
-                        <span className={`position-side ${isLong ? 'long' : 'short'}`}>
-                          {isLong ? 'LONG' : 'SHORT'}
-                        </span>
-                      </div>
-                      <div className="position-details">
-                        <div className="position-row">
-                          <span>Size:</span>
-                          <span>{Math.abs(size).toFixed(4)}</span>
+{perpState.assetPositions.map((position, idx) => {
+  const size = parseFloat(position.position.szi);
+  if (isNaN(size)) {
+    return (
+      <div key={idx} className="position-card">
+        <span className="error-value">Invalid position data</span>
+      </div>
+    );
+  }
+  const isLong = size > 0;
+  return (
+    <div key={idx} className="position-card">
+      <div className="position-header">
+        <span className="position-coin">{position.position.coin}</span>
+        <span className={`position-side ${isLong ? 'long' : 'short'}`}>
+          {isLong ? 'LONG' : 'SHORT'}
+        </span>
+      </div>
+      <div className="position-details">
+        <div className="position-row">
+          <span>Size:</span>
+          <span>{Math.abs(size).toFixed(4)}</span>
+        </div>
+        {/* …rest of the details… */}
                         </div>
                       <div className="position-row">
                         <span>Entry Price:</span>
