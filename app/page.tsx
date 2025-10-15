@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { CoreWriterActionLog } from './components/CoreWriterActionLog';
 import { TransactionInfo } from './components/TransactionInfo';
 import { AllLogs } from './components/AllLogs';
 import { HyperCoreTransactionInfo } from './components/HyperCoreTransactionInfo';
+import { UnifiedSearchBar } from './components/UnifiedSearchBar';
 import {
   JsonRpcProvider,
   Log,
@@ -41,19 +43,17 @@ type Network = 'mainnet' | 'testnet' | 'custom';
 type ChainType = 'hyperevm' | 'hypercore';
 
 export default function Home() {
-  // Separate state for each chain type
-  const [hyperEvmTxHash, setHyperEvmTxHash] = useState<string>(
-    '0xfda27b7180779cfd99ebcd5a451bb68dead6d89fab8e508a7b5b6d137dccd51e'
-  );
-  const [hyperCoreTxHash, setHyperCoreTxHash] = useState<string>('');
+  const router = useRouter();
 
-  // Separate network settings for each chain type
-  const [hyperEvmNetwork, setHyperEvmNetwork] = useState<Network>('mainnet');
-  const [hyperCoreNetwork, setHyperCoreNetwork] = useState<Network>('mainnet');
-  const [hyperEvmCustomRpc, setHyperEvmCustomRpc] = useState<string>('');
-  // Note: HyperCore (L1) doesn't support custom RPC, only mainnet/testnet
+  // Unified search state
+  const [searchInput, setSearchInput] = useState<string>('');
+  const [network, setNetwork] = useState<Network>('mainnet');
+  const [customRpc, setCustomRpc] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
 
-  const [chainType, setChainType] = useState<ChainType>('hyperevm');
+  // Chain type determined by search result
+  const [chainType, setChainType] = useState<ChainType | null>(null);
 
   // Separate results for HyperEVM (L2)
   const [hyperEvmTransaction, setHyperEvmTransaction] =
@@ -63,21 +63,19 @@ export default function Home() {
   const [hyperEvmBlock, setHyperEvmBlock] = useState<Block | null>(null);
   const [hyperEvmLogs, setHyperEvmLogs] = useState<Array<Log>>([]);
   const [hyperEvmError, setHyperEvmError] = useState<string>('');
-  const [hyperEvmLoading, setHyperEvmLoading] = useState(false);
+  const [_hyperEvmLoading, setHyperEvmLoading] = useState(false);
 
   // Separate results for HyperCore (L1)
   const [hyperCoreTx, setHyperCoreTx] = useState<TxDetails | null>(null);
   const [hyperCoreError, setHyperCoreError] = useState<string>('');
-  const [hyperCoreLoading, setHyperCoreLoading] = useState(false);
+  const [_hyperCoreLoading, setHyperCoreLoading] = useState(false);
 
   const provider = useMemo(() => {
     let rpcUrl: string;
-    const currentNetwork = hyperEvmNetwork; // Only used for HyperEVM (L2)
-    const currentCustomRpc = hyperEvmCustomRpc;
 
-    if (currentNetwork === 'custom') {
-      rpcUrl = currentCustomRpc || MAINNET_RPC;
-    } else if (currentNetwork === 'testnet') {
+    if (network === 'custom') {
+      rpcUrl = customRpc || MAINNET_RPC;
+    } else if (network === 'testnet') {
       rpcUrl = TESTNET_RPC;
     } else {
       rpcUrl = MAINNET_RPC;
@@ -86,7 +84,7 @@ export default function Home() {
     return new JsonRpcProvider(rpcUrl, 999, {
       staticNetwork: true,
     });
-  }, [hyperEvmNetwork, hyperEvmCustomRpc]);
+  }, [network, customRpc]);
 
   const loadHyperEVM = useCallback(
     async (tx: string) => {
@@ -156,7 +154,7 @@ export default function Home() {
     async (tx: string) => {
       try {
         const transportConfig: HttpTransportOptions = {
-          isTestnet: hyperCoreNetwork === 'testnet',
+          isTestnet: network === 'testnet',
         };
 
         const transport = new hl.HttpTransport(transportConfig);
@@ -172,56 +170,127 @@ export default function Home() {
         setHyperCoreLoading(false);
       }
     },
-    [hyperCoreNetwork]
+    [network]
   );
 
-  const load = useCallback(
-    async (tx: string) => {
-      if (tx === undefined || tx === '') {
-        return Promise.resolve();
-      }
+  // Validation helpers
+  const isValidAddress = (input: string): boolean => {
+    const trimmed = input.trim();
+    return (
+      trimmed.startsWith('0x') &&
+      trimmed.length === 42 &&
+      /^0x[0-9a-fA-F]{40}$/.test(trimmed)
+    );
+  };
 
-      if (chainType === 'hyperevm') {
+  const isValidTxHash = (input: string): boolean => {
+    const trimmed = input.trim();
+    return (
+      trimmed.startsWith('0x') &&
+      trimmed.length === 66 &&
+      /^0x[0-9a-fA-F]{64}$/.test(trimmed)
+    );
+  };
+
+  const handleSearch = useCallback(async () => {
+    const trimmedInput = searchInput.trim();
+
+    if (!trimmedInput) {
+      setError('Please enter a transaction hash or address');
+      return;
+    }
+
+    // Reset previous states
+    setError('');
+    setHyperEvmError('');
+    setHyperCoreError('');
+    setChainType(null);
+
+    // Check if input is an address
+    if (isValidAddress(trimmedInput)) {
+      // Navigate to account details page
+      router.push(`/account?address=${trimmedInput}`);
+      return;
+    }
+
+    // Check if input is a transaction hash
+    if (isValidTxHash(trimmedInput)) {
+      setLoading(true);
+
+      // Try both chains in parallel
+      const hyperEvmPromise = (async () => {
+        try {
+          const receipt = await provider.getTransactionReceipt(trimmedInput);
+          return receipt ? { chain: 'hyperevm' as const, receipt } : null;
+        } catch {
+          return null;
+        }
+      })();
+
+      const hyperCorePromise = (async () => {
+        try {
+          const transportConfig: HttpTransportOptions = {
+            isTestnet: network === 'testnet',
+          };
+          const transport = new hl.HttpTransport(transportConfig);
+          const client = new hl.InfoClient({ transport });
+          const result = await client.txDetails({
+            hash: trimmedInput as `0x${string}`,
+          });
+          return result.tx
+            ? { chain: 'hypercore' as const, tx: result.tx }
+            : null;
+        } catch {
+          return null;
+        }
+      })();
+
+      const results = await Promise.all([hyperEvmPromise, hyperCorePromise]);
+      const hyperEvmResult = results[0];
+      const hyperCoreResult = results[1];
+
+      if (hyperEvmResult) {
+        // Transaction found on HyperEVM
+        setChainType('hyperevm');
         setHyperEvmLogs([]);
         setHyperEvmTransaction(null);
         setHyperEvmReceipt(null);
         setHyperEvmBlock(null);
         setHyperEvmError('');
         setHyperEvmLoading(true);
-        await loadHyperEVM(tx);
-      } else {
+        setLoading(false);
+        await loadHyperEVM(trimmedInput);
+      } else if (hyperCoreResult) {
+        // Transaction found on HyperCore
+        setChainType('hypercore');
         setHyperCoreTx(null);
         setHyperCoreError('');
         setHyperCoreLoading(true);
-        await loadHyperCore(tx);
+        setLoading(false);
+        await loadHyperCore(trimmedInput);
+      } else {
+        // Not found on either chain
+        setLoading(false);
+        setError(
+          'Transaction hash not found on either HyperEVM or HyperCore. Please check the hash and network settings.'
+        );
       }
-    },
-    [chainType, loadHyperEVM, loadHyperCore]
-  );
+      return;
+    }
+
+    // Invalid input
+    setError(
+      'Invalid input. Please enter a valid transaction hash (66 characters) or account address (42 characters).'
+    );
+  }, [searchInput, network, provider, router, loadHyperEVM, loadHyperCore]);
 
   return (
     <div className="App">
       <div className="header">
         <h1>CoreWriter Trace</h1>
         <p className="subtitle">
-          View comprehensive transaction information and decode CoreWriter
-          actions
+          Search for transactions by hash or explore accounts by address
         </p>
-      </div>
-
-      <div className="tab-switcher">
-        <button
-          className={`tab-button ${chainType === 'hyperevm' ? 'active' : ''}`}
-          onClick={() => setChainType('hyperevm')}
-        >
-          HyperEVM (L2)
-        </button>
-        <button
-          className={`tab-button ${chainType === 'hypercore' ? 'active' : ''}`}
-          onClick={() => setChainType('hypercore')}
-        >
-          HyperCore (L1)
-        </button>
       </div>
 
       <div className="config-section">
@@ -229,79 +298,39 @@ export default function Home() {
           <label htmlFor="network">Network</label>
           <select
             id="network"
-            value={
-              chainType === 'hyperevm' ? hyperEvmNetwork : hyperCoreNetwork
-            }
-            onChange={e => {
-              const newNetwork = e.target.value as Network;
-              if (chainType === 'hyperevm') {
-                setHyperEvmNetwork(newNetwork);
-              } else {
-                setHyperCoreNetwork(newNetwork);
-              }
-            }}
+            value={network}
+            onChange={e => setNetwork(e.target.value as Network)}
             className="select-input"
           >
             <option value="mainnet">Mainnet</option>
             <option value="testnet">Testnet</option>
-            {chainType === 'hyperevm' && (
-              <option value="custom">Custom RPC</option>
-            )}
+            <option value="custom">Custom RPC</option>
           </select>
         </div>
 
-        {chainType === 'hyperevm' && hyperEvmNetwork === 'custom' && (
+        {network === 'custom' && (
           <div className="form-group">
             <label htmlFor="customRpc">Custom RPC Endpoint</label>
             <input
               id="customRpc"
               type="text"
-              value={hyperEvmCustomRpc}
-              onChange={e => setHyperEvmCustomRpc(e.target.value)}
+              value={customRpc}
+              onChange={e => setCustomRpc(e.target.value)}
               placeholder="https://your-rpc-endpoint.com"
               className="text-input"
             />
           </div>
         )}
 
-        <div className="form-group">
-          <label htmlFor="txHash">Transaction Hash</label>
-          <div className="input-button-group">
-            <input
-              id="txHash"
-              type="text"
-              value={
-                chainType === 'hyperevm' ? hyperEvmTxHash : hyperCoreTxHash
-              }
-              onChange={event => {
-                const newHash = event.currentTarget.value;
-                if (chainType === 'hyperevm') {
-                  setHyperEvmTxHash(newHash);
-                } else {
-                  setHyperCoreTxHash(newHash);
-                }
-              }}
-              placeholder="0x..."
-              className="text-input"
-            />
-            <button
-              onClick={() => {
-                const txHash =
-                  chainType === 'hyperevm' ? hyperEvmTxHash : hyperCoreTxHash;
-                txHash && load(txHash);
-              }}
-              disabled={
-                chainType === 'hyperevm' ? hyperEvmLoading : hyperCoreLoading
-              }
-              className="load-button"
-            >
-              {(chainType === 'hyperevm' ? hyperEvmLoading : hyperCoreLoading)
-                ? 'Loading...'
-                : 'Load'}
-            </button>
-          </div>
-        </div>
+        <UnifiedSearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onSearch={handleSearch}
+          loading={loading}
+        />
       </div>
+
+      {error && <div className="error-message">{error}</div>}
 
       {chainType === 'hyperevm' && hyperEvmError && (
         <div className="error-message">{hyperEvmError}</div>
@@ -353,7 +382,7 @@ export default function Home() {
           <h2>HyperCore Transaction Details</h2>
           <HyperCoreTransactionInfo
             txDetails={hyperCoreTx}
-            isTestnet={hyperCoreNetwork === 'testnet'}
+            isTestnet={network === 'testnet'}
           />
         </div>
       )}
