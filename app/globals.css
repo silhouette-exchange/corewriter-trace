@@ -1006,6 +1006,20 @@ button.clickable-address:focus {
   background: #f3f4f6;
 }
 
+.balance-error-row {
+  grid-template-columns: 1.5fr 2.5fr;
+  background: #fef2f2;
+}
+
+.balance-error-row:hover {
+  background: #fee2e2;
+}
+
+.balance-error-message {
+  text-align: center;
+  font-style: italic;
+}
+
 .asset-name {
   font-weight: 600;
   color: #1f2937;
