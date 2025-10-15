@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
-import * as hl from "@nktkas/hyperliquid";
+import * as hl from '@nktkas/hyperliquid';
 import Link from 'next/link';
 
 interface HyperCoreTransactionListProps {
@@ -21,29 +21,34 @@ interface UserDetail {
   user: string;
 }
 
-export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransactionListProps) {
+export function HyperCoreTransactionList({
+  address,
+  isTestnet,
+}: HyperCoreTransactionListProps) {
   const [transactions, setTransactions] = useState<UserDetail[]>([]);
   const [allTransactions, setAllTransactions] = useState<UserDetail[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        setError("");
+        setError('');
 
         const transportConfig: hl.HttpTransportOptions = {
-          isTestnet
+          isTestnet,
         };
 
         const transport = new hl.HttpTransport(transportConfig);
         const client = new hl.InfoClient({ transport });
 
         // Fetch user details (all actions)
-        const result = await client.userDetails({ user: address as `0x${string}` });
-        
+        const result = await client.userDetails({
+          user: address as `0x${string}`,
+        });
+
         // Store all transactions (userDetails returns an object with txs property)
         const txs = result.txs || [];
         setAllTransactions(txs);
@@ -64,7 +69,10 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
 
   const loadMore = () => {
     // Load next batch from cached data
-    const nextBatch = allTransactions.slice(transactions.length, transactions.length + 25);
+    const nextBatch = allTransactions.slice(
+      transactions.length,
+      transactions.length + 25
+    );
     setTransactions([...transactions, ...nextBatch]);
     setHasMore(allTransactions.length > transactions.length + nextBatch.length);
   };
@@ -83,26 +91,21 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
 
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   };
 
   if (loading) {
-    return (
-      <div className="loading-state">Loading transactions...</div>
-    );
+    return <div className="loading-state">Loading transactions...</div>;
   }
 
   if (error) {
-    return (
-      <div className="error-message">{error}</div>
-    );
+    return <div className="error-message">{error}</div>;
   }
 
   if (transactions.length === 0) {
-    return (
-      <div className="empty-state">No transactions found</div>
-    );
+    return <div className="empty-state">No transactions found</div>;
   }
 
   return (
@@ -124,7 +127,9 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
             </span>
             <span className="transaction-type">{tx.action.type}</span>
             <span className="transaction-block">{tx.block}</span>
-            <span className={`transaction-status ${tx.error ? 'error' : 'success'}`}>
+            <span
+              className={`transaction-status ${tx.error ? 'error' : 'success'}`}
+            >
               {tx.error ? 'Failed' : 'Success'}
             </span>
             <span className="transaction-age" title={formatTimestamp(tx.time)}>

@@ -1,5 +1,5 @@
-import { AbiCoder, BytesLike } from "ethers";
-import { decodeCoreWriterAction } from "./decodeCoreWriterAction";
+import { AbiCoder, BytesLike } from 'ethers';
+import { decodeCoreWriterAction } from './decodeCoreWriterAction';
 
 interface ActionValueOutputProps {
   value: any;
@@ -8,7 +8,7 @@ interface ActionValueOutputProps {
 const ActionValueOutput = (props: ActionValueOutputProps) => {
   const { value } = props;
 
-  if (typeof value === "bigint") {
+  if (typeof value === 'bigint') {
     return value.toString();
   }
 

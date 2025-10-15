@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
-import * as hl from "@nktkas/hyperliquid";
+import * as hl from '@nktkas/hyperliquid';
 
 interface AccountBalanceModalProps {
   address: string;
@@ -67,20 +67,25 @@ interface SpotClearinghouseState {
   }>;
 }
 
-export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBalanceModalProps) {
-  const [spotBalances, setSpotBalances] = useState<SpotClearinghouseState | null>(null);
+export function AccountBalanceModal({
+  address,
+  isTestnet,
+  onClose,
+}: AccountBalanceModalProps) {
+  const [spotBalances, setSpotBalances] =
+    useState<SpotClearinghouseState | null>(null);
   const [perpState, setPerpState] = useState<ClearinghouseState | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchBalances = async () => {
       try {
         setLoading(true);
-        setError("");
+        setError('');
 
         const transportConfig: hl.HttpTransportOptions = {
-          isTestnet
+          isTestnet,
         };
 
         const transport = new hl.HttpTransport(transportConfig);
@@ -89,7 +94,7 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
         // Fetch both spot and perpetual balances in parallel
         const [spotResult, perpResult] = await Promise.all([
           client.spotClearinghouseState({ user: address as `0x${string}` }),
-          client.clearinghouseState({ user: address as `0x${string}` })
+          client.clearinghouseState({ user: address as `0x${string}` }),
         ]);
 
         setSpotBalances(spotResult);
@@ -106,10 +111,12 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Account Balance</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className="modal-body">
@@ -118,13 +125,9 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
             <span className="hash-value">{address}</span>
           </div>
 
-          {loading && (
-            <div className="loading-state">Loading balances...</div>
-          )}
+          {loading && <div className="loading-state">Loading balances...</div>}
 
-          {error && (
-            <div className="error-message">{error}</div>
-          )}
+          {error && <div className="error-message">{error}</div>}
 
           {!loading && !error && (
             <>
@@ -136,37 +139,61 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
                     <div className="balance-summary">
                       <div className="balance-row">
                         <span className="balance-label">Account Value:</span>
-                        <span className="balance-value">${perpState.marginSummary.accountValue}</span>
+                        <span className="balance-value">
+                          ${perpState.marginSummary.accountValue}
+                        </span>
                       </div>
                       <div className="balance-row">
                         <span className="balance-label">Withdrawable:</span>
-                        <span className="balance-value">${perpState.withdrawable}</span>
+                        <span className="balance-value">
+                          ${perpState.withdrawable}
+                        </span>
                       </div>
                       <div className="balance-row">
-                        <span className="balance-label">Total Margin Used:</span>
-                        <span className="balance-value">${perpState.marginSummary.totalMarginUsed}</span>
+                        <span className="balance-label">
+                          Total Margin Used:
+                        </span>
+                        <span className="balance-value">
+                          ${perpState.marginSummary.totalMarginUsed}
+                        </span>
                       </div>
                       <div className="balance-row">
-                        <span className="balance-label">Total Position Value:</span>
-                        <span className="balance-value">${perpState.marginSummary.totalNtlPos}</span>
+                        <span className="balance-label">
+                          Total Position Value:
+                        </span>
+                        <span className="balance-value">
+                          ${perpState.marginSummary.totalNtlPos}
+                        </span>
                       </div>
                     </div>
 
                     {perpState.assetPositions.length > 0 && (
                       <div className="positions-section">
-                        <h4>Open Positions ({perpState.assetPositions.length})</h4>
+                        <h4>
+                          Open Positions ({perpState.assetPositions.length})
+                        </h4>
                         {perpState.assetPositions.map((position, idx) => (
                           <div key={idx} className="position-card">
                             <div className="position-header">
-                              <span className="position-coin">{position.position.coin}</span>
-                              <span className={`position-side ${parseFloat(position.position.szi) > 0 ? 'long' : 'short'}`}>
-                                {parseFloat(position.position.szi) > 0 ? 'LONG' : 'SHORT'}
+                              <span className="position-coin">
+                                {position.position.coin}
+                              </span>
+                              <span
+                                className={`position-side ${parseFloat(position.position.szi) > 0 ? 'long' : 'short'}`}
+                              >
+                                {parseFloat(position.position.szi) > 0
+                                  ? 'LONG'
+                                  : 'SHORT'}
                               </span>
                             </div>
                             <div className="position-details">
                               <div className="position-row">
                                 <span>Size:</span>
-                                <span>{Math.abs(parseFloat(position.position.szi)).toFixed(4)}</span>
+                                <span>
+                                  {Math.abs(
+                                    parseFloat(position.position.szi)
+                                  ).toFixed(4)}
+                                </span>
                               </div>
                               <div className="position-row">
                                 <span>Entry Price:</span>
@@ -178,18 +205,31 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
                               </div>
                               <div className="position-row">
                                 <span>Unrealized PnL:</span>
-                                <span className={parseFloat(position.position.unrealizedPnl) >= 0 ? 'positive' : 'negative'}>
+                                <span
+                                  className={
+                                    parseFloat(
+                                      position.position.unrealizedPnl
+                                    ) >= 0
+                                      ? 'positive'
+                                      : 'negative'
+                                  }
+                                >
                                   ${position.position.unrealizedPnl}
                                 </span>
                               </div>
                               <div className="position-row">
                                 <span>Leverage:</span>
-                                <span>{position.position.leverage.value}x ({position.position.leverage.type})</span>
+                                <span>
+                                  {position.position.leverage.value}x (
+                                  {position.position.leverage.type})
+                                </span>
                               </div>
                               {position.position.liquidationPx && (
                                 <div className="position-row">
                                   <span>Liquidation Price:</span>
-                                  <span className="warning">${position.position.liquidationPx}</span>
+                                  <span className="warning">
+                                    ${position.position.liquidationPx}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -199,7 +239,9 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
                     )}
 
                     {perpState.assetPositions.length === 0 && (
-                      <div className="empty-state">No open perpetual positions</div>
+                      <div className="empty-state">
+                        No open perpetual positions
+                      </div>
                     )}
                   </>
                 )}
@@ -220,7 +262,7 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
                       const total = parseFloat(balance.total);
                       const hold = parseFloat(balance.hold);
                       const available = total - hold;
-                      
+
                       return (
                         <div key={idx} className="balance-table-row">
                           <span className="asset-name">{balance.coin}</span>
@@ -235,17 +277,18 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
                   <div className="empty-state">No spot balances</div>
                 )}
 
-                {spotBalances?.evmEscrows && spotBalances.evmEscrows.length > 0 && (
-                  <div className="escrow-section">
-                    <h4>Escrowed Balances</h4>
-                    {spotBalances.evmEscrows.map((escrow, idx) => (
-                      <div key={idx} className="escrow-row">
-                        <span>{escrow.coin}:</span>
-                        <span>{escrow.total}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {spotBalances?.evmEscrows &&
+                  spotBalances.evmEscrows.length > 0 && (
+                    <div className="escrow-section">
+                      <h4>Escrowed Balances</h4>
+                      {spotBalances.evmEscrows.map((escrow, idx) => (
+                        <div key={idx} className="escrow-row">
+                          <span>{escrow.coin}:</span>
+                          <span>{escrow.total}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
             </>
           )}
@@ -254,4 +297,3 @@ export function AccountBalanceModal({ address, isTestnet, onClose }: AccountBala
     </div>
   );
 }
-

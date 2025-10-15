@@ -1,2 +1,1 @@
 export { TransactionInfo } from './TransactionInfo';
-

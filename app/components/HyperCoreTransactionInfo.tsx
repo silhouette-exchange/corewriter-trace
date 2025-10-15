@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
-import * as hl from "@nktkas/hyperliquid";
+import * as hl from '@nktkas/hyperliquid';
 import Link from 'next/link';
 import { AccountBalanceModal } from './AccountBalanceModal';
 
@@ -35,27 +35,38 @@ function formatOrderAction(actionData: any) {
     price: order.p,
     size: order.s,
     reduceOnly: order.r,
-    orderType: order.t?.limit ? 'Limit' : order.t?.trigger ? 'Trigger' : 'Unknown',
+    orderType: order.t?.limit
+      ? 'Limit'
+      : order.t?.trigger
+        ? 'Trigger'
+        : 'Unknown',
     timeInForce: order.t?.limit?.tif || null,
-    triggerDetails: order.t?.trigger ? {
-      isMarket: order.t.trigger.isMarket,
-      triggerPrice: order.t.trigger.triggerPx,
-      tpsl: order.t.trigger.tpsl
-    } : null,
-    clientOrderId: order.c || null
+    triggerDetails: order.t?.trigger
+      ? {
+          isMarket: order.t.trigger.isMarket,
+          triggerPrice: order.t.trigger.triggerPx,
+          tpsl: order.t.trigger.tpsl,
+        }
+      : null,
+    clientOrderId: order.c || null,
   });
 
   return {
     orders: actionData.orders.map(formatOrder),
     grouping: actionData.grouping,
-    builder: actionData.builder ? {
-      builderAddress: actionData.builder.b,
-      feeInTenthsOfBasisPoint: actionData.builder.f
-    } : null
+    builder: actionData.builder
+      ? {
+          builderAddress: actionData.builder.b,
+          feeInTenthsOfBasisPoint: actionData.builder.f,
+        }
+      : null,
   };
 }
 
-export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTransactionInfoProps) {
+export function HyperCoreTransactionInfo({
+  txDetails,
+  isTestnet,
+}: HyperCoreTransactionInfoProps) {
   const [showBalanceModal, setShowBalanceModal] = useState(false);
 
   return (
@@ -69,13 +80,15 @@ export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTran
         <div className="info-row">
           <span className="info-label">User:</span>
           <span className="info-value hash-value">
-            <Link href={`/account?address=${txDetails.user}`} className="clickable-address">
+            <Link
+              href={`/account?address=${txDetails.user}`}
+              className="clickable-address"
+            >
               {txDetails.user}
-            </Link>
-            {' '}
-            <button 
+            </Link>{' '}
+            <button
               type="button"
-              className="balance-button" 
+              className="balance-button"
               onClick={() => setShowBalanceModal(true)}
               title="View balance details"
               aria-label="View account balance for this address"
@@ -116,7 +129,9 @@ export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTran
               {JSON.stringify(
                 formatOrderAction(
                   Object.fromEntries(
-                    Object.entries(txDetails.action).filter(([key]) => key !== "type")
+                    Object.entries(txDetails.action).filter(
+                      ([key]) => key !== 'type'
+                    )
                   )
                 ),
                 null,
@@ -128,7 +143,7 @@ export function HyperCoreTransactionInfo({ txDetails, isTestnet }: HyperCoreTran
       </div>
 
       {showBalanceModal && (
-        <AccountBalanceModal 
+        <AccountBalanceModal
           address={txDetails.user}
           isTestnet={isTestnet}
           onClose={() => setShowBalanceModal(false)}

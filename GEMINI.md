@@ -10,8 +10,8 @@ The application is configured for static export, which means it can be deployed 
 
 ### Prerequisites
 
--   **Node.js**: 18.18.0 or higher
--   **pnpm**: 9.15.0 or higher
+- **Node.js**: 18.18.0 or higher
+- **pnpm**: 9.15.0 or higher
 
 ### Installation
 
@@ -49,13 +49,13 @@ This will serve the static files from the `out/` directory.
 
 The following scripts are available in `package.json`:
 
--   `pnpm dev`: Start the development server.
--   `pnpm build`: Build the application for production.
--   `pnpm start`: Start the production server.
--   `pnpm lint`: Run ESLint to check for code quality and style issues.
--   `pnpm test`: Run tests using Jest.
--   `pnpm clean`: Clean build artifacts and cache.
--   `pnpm type-check`: Run the TypeScript compiler to check for type errors.
+- `pnpm dev`: Start the development server.
+- `pnpm build`: Build the application for production.
+- `pnpm start`: Start the production server.
+- `pnpm lint`: Run ESLint to check for code quality and style issues.
+- `pnpm test`: Run tests using Jest.
+- `pnpm clean`: Clean build artifacts and cache.
+- `pnpm type-check`: Run the TypeScript compiler to check for type errors.
 
 ### Code Style
 

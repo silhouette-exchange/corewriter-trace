@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { HyperCoreAccountState } from './HyperCoreAccountState';
 import { HyperCoreTransactionList } from './HyperCoreTransactionList';
@@ -8,11 +8,14 @@ interface HyperCoreAccountDetailsProps {
   isTestnet: boolean;
 }
 
-export function HyperCoreAccountDetails({ address, isTestnet }: HyperCoreAccountDetailsProps) {
+export function HyperCoreAccountDetails({
+  address,
+  isTestnet,
+}: HyperCoreAccountDetailsProps) {
   return (
     <div className="account-pane">
       <h2 className="pane-title">HyperCore (L1) State</h2>
-      
+
       <div className="account-section">
         <HyperCoreAccountState address={address} isTestnet={isTestnet} />
       </div>

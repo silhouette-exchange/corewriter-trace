@@ -1,6 +1,6 @@
-import { Log } from "ethers";
-import { useState } from "react";
-import { CORE_WRITER_ADDRESS } from "../../../constants/addresses";
+import { Log } from 'ethers';
+import { useState } from 'react';
+import { CORE_WRITER_ADDRESS } from '../../../constants/addresses';
 
 interface AllLogsProps {
   logs: Log[];
@@ -26,8 +26,8 @@ const LogEntry = ({ log, index, isCoreWriter }: LogEntryProps) => {
 
   return (
     <div className={`log-entry ${isCoreWriter ? 'log-corewriter' : ''}`}>
-      <div 
-        className="log-header" 
+      <div
+        className="log-header"
         onClick={handleToggle}
         role="button"
         tabIndex={0}
@@ -40,9 +40,11 @@ const LogEntry = ({ log, index, isCoreWriter }: LogEntryProps) => {
         <span className="log-address">
           <code>{log.address}</code>
         </span>
-        <span className={`log-expand-icon ${expanded ? 'expanded' : ''}`}>▼</span>
+        <span className={`log-expand-icon ${expanded ? 'expanded' : ''}`}>
+          ▼
+        </span>
       </div>
-      
+
       {expanded && (
         <div className="log-details" id={`log-details-${log.index}`}>
           <table className="log-table">
@@ -102,7 +104,7 @@ export const AllLogs = ({ logs }: AllLogsProps) => {
   const coreWriterLogs = logs.filter(
     log => log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase()
   );
-  
+
   const otherLogs = logs.filter(
     log => log.address.toLowerCase() !== CORE_WRITER_ADDRESS.toLowerCase()
   );
@@ -111,7 +113,7 @@ export const AllLogs = ({ logs }: AllLogsProps) => {
     <div className="all-logs-container">
       <div className="logs-header">
         <h3>Transaction Logs ({logs.length} total)</h3>
-        <button 
+        <button
           className="toggle-logs-button"
           onClick={() => setShowAllLogs(!showAllLogs)}
         >
@@ -129,10 +131,10 @@ export const AllLogs = ({ logs }: AllLogsProps) => {
                 <div className="logs-section">
                   <h4>CoreWriter Logs ({coreWriterLogs.length})</h4>
                   {coreWriterLogs.map((log, index) => (
-                    <LogEntry 
-                      key={log.index} 
-                      log={log} 
-                      index={log.index} 
+                    <LogEntry
+                      key={log.index}
+                      log={log}
+                      index={log.index}
                       isCoreWriter={true}
                     />
                   ))}
@@ -143,10 +145,10 @@ export const AllLogs = ({ logs }: AllLogsProps) => {
                 <div className="logs-section">
                   <h4>Other Logs ({otherLogs.length})</h4>
                   {otherLogs.map((log, index) => (
-                    <LogEntry 
-                      key={log.index} 
-                      log={log} 
-                      index={log.index} 
+                    <LogEntry
+                      key={log.index}
+                      log={log}
+                      index={log.index}
                       isCoreWriter={false}
                     />
                   ))}

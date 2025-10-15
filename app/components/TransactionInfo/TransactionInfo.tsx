@@ -1,5 +1,10 @@
-import { TransactionResponse, TransactionReceipt, Block, formatEther } from "ethers";
-import { useCallback, useMemo } from "react";
+import {
+  TransactionResponse,
+  TransactionReceipt,
+  Block,
+  formatEther,
+} from 'ethers';
+import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 
 interface TransactionInfoProps {
@@ -8,35 +13,44 @@ interface TransactionInfoProps {
   block: Block | null;
 }
 
-export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfoProps) => {
+export const TransactionInfo = ({
+  transaction,
+  receipt,
+  block,
+}: TransactionInfoProps) => {
   const formatGasPrice = useCallback((gasPrice: bigint | null) => {
-    if (!gasPrice) return "N/A";
+    if (!gasPrice) return 'N/A';
     const gwei = Number(gasPrice) / 1e9;
     return `${gwei.toFixed(2)} Gwei`;
   }, []);
 
   const formatTimestamp = useCallback((timestamp: number | undefined) => {
-    if (!timestamp) return "N/A";
+    if (!timestamp) return 'N/A';
     const date = new Date(timestamp * 1000);
     return date.toLocaleString();
   }, []);
 
   const { totalGasFee, effectiveGasPrice } = useMemo(() => {
     // Use effectiveGasPrice for EIP-1559 transactions, fallback to gasPrice for legacy transactions
-    const gasPrice = (receipt as any).effectiveGasPrice || transaction.gasPrice || BigInt(0);
+    const gasPrice =
+      (receipt as any).effectiveGasPrice || transaction.gasPrice || BigInt(0);
     try {
       return {
         totalGasFee: receipt.gasUsed * gasPrice,
-        effectiveGasPrice: gasPrice
+        effectiveGasPrice: gasPrice,
       };
     } catch (error) {
       console.warn('Gas fee calculation overflow:', error);
       return {
         totalGasFee: BigInt(0),
-        effectiveGasPrice: gasPrice
+        effectiveGasPrice: gasPrice,
       };
     }
-  }, [receipt.gasUsed, (receipt as any).effectiveGasPrice, transaction.gasPrice]);
+  }, [
+    receipt.gasUsed,
+    (receipt as any).effectiveGasPrice,
+    transaction.gasPrice,
+  ]);
 
   return (
     <div className="transaction-info-container">
@@ -53,7 +67,9 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
             <tr>
               <td className="info-label">Status:</td>
               <td className="info-value">
-                <span className={`status-badge ${receipt.status === 1 ? 'status-success' : 'status-failed'}`}>
+                <span
+                  className={`status-badge ${receipt.status === 1 ? 'status-success' : 'status-failed'}`}
+                >
                   {receipt.status === 1 ? '✓ Success' : '✗ Failed'}
                 </span>
               </td>
@@ -65,14 +81,19 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
             {block && (
               <tr>
                 <td className="info-label">Timestamp:</td>
-                <td className="info-value">{formatTimestamp(block.timestamp)}</td>
+                <td className="info-value">
+                  {formatTimestamp(block.timestamp)}
+                </td>
               </tr>
             )}
             <tr>
               <td className="info-label">From:</td>
               <td className="info-value">
                 <code>
-                  <Link href={`/account?address=${transaction.from}`} className="clickable-address">
+                  <Link
+                    href={`/account?address=${transaction.from}`}
+                    className="clickable-address"
+                  >
                     {transaction.from}
                   </Link>
                 </code>
@@ -83,11 +104,14 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
               <td className="info-value">
                 <code>
                   {transaction.to ? (
-                    <Link href={`/account?address=${transaction.to}`} className="clickable-address">
+                    <Link
+                      href={`/account?address=${transaction.to}`}
+                      className="clickable-address"
+                    >
                       {transaction.to}
                     </Link>
                   ) : (
-                    "Contract Creation"
+                    'Contract Creation'
                   )}
                 </code>
               </td>
@@ -97,7 +121,10 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
               <td className="info-value">
                 {formatEther(transaction.value)} ETH
                 {transaction.value > BigInt(0) && (
-                  <span className="info-secondary"> ({transaction.value.toString()} wei)</span>
+                  <span className="info-secondary">
+                    {' '}
+                    ({transaction.value.toString()} wei)
+                  </span>
                 )}
               </td>
             </tr>
@@ -118,7 +145,13 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
               <td className="info-value">
                 {receipt.gasUsed.toString()}
                 <span className="info-secondary">
-                  {" "}({((Number(receipt.gasUsed) / Number(transaction.gasLimit)) * 100).toFixed(2)}% of limit)
+                  {' '}
+                  (
+                  {(
+                    (Number(receipt.gasUsed) / Number(transaction.gasLimit)) *
+                    100
+                  ).toFixed(2)}
+                  % of limit)
                 </span>
               </td>
             </tr>
@@ -132,7 +165,10 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
               <td className="info-label">Transaction Fee:</td>
               <td className="info-value">
                 {formatEther(totalGasFee)} ETH
-                <span className="info-secondary"> ({totalGasFee.toString()} wei)</span>
+                <span className="info-secondary">
+                  {' '}
+                  ({totalGasFee.toString()} wei)
+                </span>
               </td>
             </tr>
           </tbody>
@@ -154,8 +190,9 @@ export const TransactionInfo = ({ transaction, receipt, block }: TransactionInfo
             <tr>
               <td className="info-label">Input Data:</td>
               <td className="info-value">
-                {Math.max(0, Math.floor((transaction.data.length - 2) / 2))} bytes
-                {transaction.data !== "0x" && (
+                {Math.max(0, Math.floor((transaction.data.length - 2) / 2))}{' '}
+                bytes
+                {transaction.data !== '0x' && (
                   <details className="data-details">
                     <summary>View Data</summary>
                     <code className="data-hex">{transaction.data}</code>

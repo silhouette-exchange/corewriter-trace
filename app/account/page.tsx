@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
 import { Suspense, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { HyperEvmAccountDetails } from '../components/AccountDetails/HyperEvmAccountDetails';
 import { HyperCoreAccountDetails } from '../components/AccountDetails/HyperCoreAccountDetails';
 
-const MAINNET_RPC = "https://rpc.purroofgroup.com";
-const TESTNET_RPC = "https://rpc.hyperliquid-testnet.xyz/evm";
+const MAINNET_RPC = 'https://rpc.purroofgroup.com';
+const TESTNET_RPC = 'https://rpc.hyperliquid-testnet.xyz/evm';
 
-type Network = "mainnet" | "testnet";
+type Network = 'mainnet' | 'testnet';
 
 function AccountContent() {
   const searchParams = useSearchParams();
   const address = searchParams.get('address');
-  
-  const [network, setNetwork] = useState<Network>("mainnet");
+
+  const [network, setNetwork] = useState<Network>('mainnet');
 
   const rpcUrl = useMemo(() => {
-    return network === "testnet" ? TESTNET_RPC : MAINNET_RPC;
+    return network === 'testnet' ? TESTNET_RPC : MAINNET_RPC;
   }, [network]);
 
   if (!address) {
@@ -38,7 +38,10 @@ function AccountContent() {
     <div className="App">
       <div className="header">
         <h1>Account Details</h1>
-        <p className="subtitle">View account balances and transaction history across HyperEVM and HyperCore</p>
+        <p className="subtitle">
+          View account balances and transaction history across HyperEVM and
+          HyperCore
+        </p>
       </div>
 
       <div className="account-header">
@@ -52,7 +55,7 @@ function AccountContent() {
           <select
             id="network"
             value={network}
-            onChange={(e) => setNetwork(e.target.value as Network)}
+            onChange={e => setNetwork(e.target.value as Network)}
             className="select-input"
           >
             <option value="mainnet">Mainnet</option>
@@ -63,7 +66,10 @@ function AccountContent() {
 
       <div className="account-panes-container">
         <HyperEvmAccountDetails address={address} rpcUrl={rpcUrl} />
-        <HyperCoreAccountDetails address={address} isTestnet={network === "testnet"} />
+        <HyperCoreAccountDetails
+          address={address}
+          isTestnet={network === 'testnet'}
+        />
       </div>
     </div>
   );
@@ -71,14 +77,16 @@ function AccountContent() {
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={
-      <div className="App">
-        <div className="header">
-          <h1>Account Details</h1>
-          <p className="subtitle">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="App">
+          <div className="header">
+            <h1>Account Details</h1>
+            <p className="subtitle">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <AccountContent />
     </Suspense>
   );
