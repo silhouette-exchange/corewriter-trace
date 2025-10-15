@@ -1225,7 +1225,7 @@ button.clickable-address:focus {
 .transaction-table-header,
 .transaction-table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
   gap: 1rem;
   padding: 0.75rem 1rem;
   align-items: center;
@@ -1314,6 +1314,22 @@ button.clickable-address:focus {
 
 .transaction-block {
   color: #6b7280;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.transaction-status {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.transaction-status.success {
+  color: #059669;
+}
+
+.transaction-status.error {
+  color: #dc2626;
 }
 
 .transaction-age {
@@ -1428,13 +1444,14 @@ button.clickable-address:focus {
 
   .transaction-table-header,
   .transaction-table-row {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1.5fr 1fr;
     font-size: 0.8rem;
   }
 
-  .transaction-table-header span:nth-child(2),
-  .transaction-table-row .transaction-method,
-  .transaction-table-row .transaction-type {
+  .transaction-table-header span:nth-child(3),
+  .transaction-table-header span:nth-child(4),
+  .transaction-table-row .transaction-block,
+  .transaction-table-row .transaction-status {
     display: none;
   }
 }

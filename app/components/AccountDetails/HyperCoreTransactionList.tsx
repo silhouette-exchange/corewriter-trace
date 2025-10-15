@@ -9,26 +9,21 @@ interface HyperCoreTransactionListProps {
   isTestnet: boolean;
 }
 
-interface UserFill {
-  coin: string;
-  px: string;
-  sz: string;
-  side: string;
-  time: number;
-  startPosition: string;
-  dir: string;
-  closedPnl: string;
+interface UserDetail {
+  action: {
+    type: string;
+    [key: string]: any;
+  };
+  block: number;
+  error?: string;
   hash: string;
-  oid: number;
-  crossed: boolean;
-  fee: string;
-  tid: number;
-  feeToken: string;
+  time: number;
+  user: string;
 }
 
 export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransactionListProps) {
-  const [transactions, setTransactions] = useState<UserFill[]>([]);
-  const [allTransactions, setAllTransactions] = useState<UserFill[]>([]);
+  const [transactions, setTransactions] = useState<UserDetail[]>([]);
+  const [allTransactions, setAllTransactions] = useState<UserDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(true);
@@ -46,8 +41,8 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
         const transport = new hl.HttpTransport(transportConfig);
         const client = new hl.InfoClient({ transport });
 
-        // Fetch user fills (trades/actions)
-        const result = await client.userFills({ user: address as `0x${string}` });
+        // Fetch user details (all actions)
+        const result = await client.userDetails({ user: address as `0x${string}` });
         
         // Store all transactions
         setAllTransactions(result);
@@ -114,11 +109,9 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
       <div className="transactions-table">
         <div className="transaction-table-header">
           <span>Hash</span>
-          <span>Action</span>
-          <span>Coin</span>
-          <span>Side</span>
-          <span>Size</span>
-          <span>Price</span>
+          <span>Action Type</span>
+          <span>Block</span>
+          <span>Status</span>
           <span>Age</span>
         </div>
         {transactions.map((tx, idx) => (
@@ -128,13 +121,11 @@ export function HyperCoreTransactionList({ address, isTestnet }: HyperCoreTransa
                 {tx.hash.slice(0, 10)}...{tx.hash.slice(-8)}
               </Link>
             </span>
-            <span className="transaction-type">Trade</span>
-            <span className="transaction-coin">{tx.coin}</span>
-            <span className={`transaction-side ${tx.side.toLowerCase()}`}>
-              {tx.side}
+            <span className="transaction-type">{tx.action.type}</span>
+            <span className="transaction-block">{tx.block}</span>
+            <span className={`transaction-status ${tx.error ? 'error' : 'success'}`}>
+              {tx.error ? 'Failed' : 'Success'}
             </span>
-            <span className="transaction-size">{parseFloat(tx.sz).toFixed(4)}</span>
-            <span className="transaction-price">${tx.px}</span>
             <span className="transaction-age" title={formatTimestamp(tx.time)}>
               {formatTimeAgo(tx.time)}
             </span>
