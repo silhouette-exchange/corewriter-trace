@@ -193,19 +193,8 @@ export function HyperCoreAccountState({ address, isTestnet }: HyperCoreAccountSt
                       </div>
                       <div className="position-row">
                         <span>Unrealized PnL:</span>
-                        <span
-                          className={
-                            !isNaN(parseFloat(position.position.unrealizedPnl)) &&
-                            parseFloat(position.position.unrealizedPnl) >= 0
-                              ? 'positive'
-                              : 'negative'
-                          }
-                        >
-                          ${
-                            !isNaN(parseFloat(position.position.unrealizedPnl))
-                              ? position.position.unrealizedPnl
-                              : 'N/A'
-                          }
+                        <span className={parseFloat(position.position.unrealizedPnl) >= 0 ? 'positive' : 'negative'}>
+                          ${position.position.unrealizedPnl}
                         </span>
                       </div>
                       <div className="position-row">
