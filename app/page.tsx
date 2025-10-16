@@ -49,6 +49,7 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState<string>('');
   const [network, setNetwork] = useState<Network>('mainnet');
   const [customRpc, setCustomRpc] = useState<string>('');
+  const [customTestnet, setCustomTestnet] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
@@ -154,7 +155,8 @@ export default function Home() {
     async (tx: string) => {
       try {
         const transportConfig: HttpTransportOptions = {
-          isTestnet: network === 'testnet',
+          isTestnet:
+            network === 'testnet' || (network === 'custom' && customTestnet),
         };
 
         const transport = new hl.HttpTransport(transportConfig);
@@ -170,7 +172,7 @@ export default function Home() {
         setHyperCoreLoading(false);
       }
     },
-    [network]
+    [network, customTestnet]
   );
 
   // Validation helpers
@@ -209,7 +211,14 @@ export default function Home() {
     // Check if input is an address
     if (isValidAddress(trimmedInput)) {
       // Navigate to account details page with network parameter
-      router.push(`/account?address=${trimmedInput}&network=${network}`);
+      // Coerce 'custom' network to a supported value for /account page
+      const coercedNetwork =
+        network === 'custom'
+          ? customTestnet
+            ? 'testnet'
+            : 'mainnet'
+          : network;
+      router.push(`/account?address=${trimmedInput}&network=${coercedNetwork}`);
       return;
     }
 
@@ -230,7 +239,8 @@ export default function Home() {
       const hyperCorePromise = (async () => {
         try {
           const transportConfig: HttpTransportOptions = {
-            isTestnet: network === 'testnet',
+            isTestnet:
+              network === 'testnet' || (network === 'custom' && customTestnet),
           };
           const transport = new hl.HttpTransport(transportConfig);
           const client = new hl.InfoClient({ transport });
@@ -309,17 +319,29 @@ export default function Home() {
         </div>
 
         {network === 'custom' && (
-          <div className="form-group">
-            <label htmlFor="customRpc">Custom RPC Endpoint</label>
-            <input
-              id="customRpc"
-              type="text"
-              value={customRpc}
-              onChange={e => setCustomRpc(e.target.value)}
-              placeholder="https://your-rpc-endpoint.com"
-              className="text-input"
-            />
-          </div>
+          <>
+            <div className="form-group">
+              <label htmlFor="customRpc">Custom RPC Endpoint</label>
+              <input
+                id="customRpc"
+                type="text"
+                value={customRpc}
+                onChange={e => setCustomRpc(e.target.value)}
+                placeholder="https://your-rpc-endpoint.com"
+                className="text-input"
+              />
+            </div>
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={customTestnet}
+                  onChange={e => setCustomTestnet(e.target.checked)}
+                />
+                <span>Custom RPC is Testnet</span>
+              </label>
+            </div>
+          </>
         )}
 
         <UnifiedSearchBar
