@@ -208,8 +208,8 @@ export default function Home() {
 
     // Check if input is an address
     if (isValidAddress(trimmedInput)) {
-      // Navigate to account details page
-      router.push(`/account?address=${trimmedInput}`);
+      // Navigate to account details page with network parameter
+      router.push(`/account?address=${trimmedInput}&network=${network}`);
       return;
     }
 
