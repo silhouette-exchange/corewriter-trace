@@ -87,6 +87,13 @@ type SendAssetAction = Action<'sendAsset'> & {
   };
 };
 
+type AddApiWalletAction = Action<'addApiWallet'> & {
+  data: {
+    apiWallet: string;
+    apiWalletName: string;
+  };
+};
+
 type UnknownAction = Action<'unknown'> & {
   data: {
     data: string;
@@ -104,6 +111,7 @@ type CoreWriterAction =
   | CancelOrderByOidAction
   | CancelOrderByCloidAction
   | SendAssetAction
+  | AddApiWalletAction
   | UnknownAction;
 
 const decodeLimitOrder = (data: string): Omit<LimitOrderAction, 'version'> => {
@@ -280,6 +288,23 @@ const decodeSendAsset = (data: string): Omit<SendAssetAction, 'version'> => {
   };
 };
 
+const decodeAddApiWallet = (
+  data: string
+): Omit<AddApiWalletAction, 'version'> => {
+  const result = ABI.decode(
+    ['address apiWallet', 'string apiWalletName'],
+    `0x${data}`
+  );
+
+  return {
+    type: 'addApiWallet',
+    data: {
+      apiWallet: result.apiWallet,
+      apiWalletName: result.apiWalletName,
+    },
+  };
+};
+
 export const decodeCoreWriterAction = (data: string): CoreWriterAction => {
   const version = parseInt(`0x${data.slice(2, 4)}`);
 
@@ -322,6 +347,11 @@ export const decodeCoreWriterAction = (data: string): CoreWriterAction => {
       return {
         version,
         ...decodeUsdClassTransfer(payload),
+      };
+    case 9:
+      return {
+        version,
+        ...decodeAddApiWallet(payload),
       };
     case 10:
       return {

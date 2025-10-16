@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface HyperEvmTransactionListProps {
   address: string;
   rpcUrl: string;
@@ -20,7 +22,7 @@ export function HyperEvmTransactionList({
       </p>
       <p className="feature-unavailable-note">
         <strong>Note:</strong> You can still view individual transactions by
-        entering their hash on the <a href="/">home page</a>.
+        entering their hash on the <Link href="/">home page</Link>.
       </p>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { HyperEvmAccountDetails } from '../components/AccountDetails/HyperEvmAccountDetails';
 import { HyperCoreAccountDetails } from '../components/AccountDetails/HyperCoreAccountDetails';
 
@@ -12,13 +12,23 @@ type Network = 'mainnet' | 'testnet';
 
 function AccountContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const address = searchParams.get('address');
+  const networkParam = searchParams.get('network') as Network | null;
 
-  const [network, setNetwork] = useState<Network>('mainnet');
+  const [network, setNetwork] = useState<Network>(
+    networkParam === 'testnet' ? 'testnet' : 'mainnet'
+  );
 
   const rpcUrl = useMemo(() => {
     return network === 'testnet' ? TESTNET_RPC : MAINNET_RPC;
   }, [network]);
+
+  const handleNetworkChange = (newNetwork: Network) => {
+    setNetwork(newNetwork);
+    // Update URL to reflect network change
+    router.push(`/account?address=${address}&network=${newNetwork}`);
+  };
 
   if (!address) {
     return (
@@ -55,7 +65,7 @@ function AccountContent() {
           <select
             id="network"
             value={network}
-            onChange={e => setNetwork(e.target.value as Network)}
+            onChange={e => handleNetworkChange(e.target.value as Network)}
             className="select-input"
           >
             <option value="mainnet">Mainnet</option>
