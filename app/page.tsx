@@ -342,8 +342,9 @@ export default function Home() {
 
       {chainType === 'hyperevm' && hyperEvmTransaction && hyperEvmReceipt && (
         <>
+          <h2>HyperEVM Transaction Details</h2>
           <div className="results-section">
-            <h2>Transaction Overview</h2>
+            <h3>Transaction Overview</h3>
             <TransactionInfo
               transaction={hyperEvmTransaction}
               receipt={hyperEvmReceipt}
@@ -357,7 +358,7 @@ export default function Home() {
 
           {hyperEvmLogs.length > 0 && (
             <div className="results-section">
-              <h2>CoreWriter Actions ({hyperEvmLogs.length})</h2>
+              <h3>CoreWriter Actions ({hyperEvmLogs.length})</h3>
               <div className="corewriter-actions">
                 {hyperEvmLogs.map((log, index) => (
                   <CoreWriterActionLog
