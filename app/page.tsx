@@ -4,8 +4,8 @@ import { useCallback, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { UnifiedSearchBar } from './components/UnifiedSearchBar';
 import { JsonRpcProvider } from 'ethers';
-import * as hl from '@nktkas/hyperliquid';
-import { HttpTransportOptions } from '@nktkas/hyperliquid';
+import { isValidTxHash } from './utils/validation';
+import { searchBothChains } from './utils/chainSearch';
 
 const MAINNET_RPC = 'https://rpc.purroofgroup.com';
 const TESTNET_RPC = 'https://rpc.hyperliquid-testnet.xyz/evm';
@@ -49,15 +49,6 @@ export default function Home() {
     );
   };
 
-  const isValidTxHash = (input: string): boolean => {
-    const trimmed = input.trim();
-    return (
-      trimmed.startsWith('0x') &&
-      trimmed.length === 66 &&
-      /^0x[0-9a-fA-F]{64}$/.test(trimmed)
-    );
-  };
-
   const handleSearch = useCallback(async () => {
     const trimmedInput = searchInput.trim();
 
@@ -87,40 +78,12 @@ export default function Home() {
     if (isValidTxHash(trimmedInput)) {
       setLoading(true);
 
-      // Try both chains in parallel
-      const hyperEvmPromise = (async () => {
-        try {
-          const receipt = await provider.getTransactionReceipt(trimmedInput);
-          return receipt ? { chain: 'hyperevm' as const, receipt } : null;
-        } catch {
-          return null;
-        }
-      })();
+      // Try both chains in parallel using utility function
+      const isTestnet =
+        network === 'testnet' || (network === 'custom' && customTestnet);
+      const result = await searchBothChains(trimmedInput, provider, isTestnet);
 
-      const hyperCorePromise = (async () => {
-        try {
-          const transportConfig: HttpTransportOptions = {
-            isTestnet:
-              network === 'testnet' || (network === 'custom' && customTestnet),
-          };
-          const transport = new hl.HttpTransport(transportConfig);
-          const client = new hl.InfoClient({ transport });
-          const result = await client.txDetails({
-            hash: trimmedInput as `0x${string}`,
-          });
-          return result.tx
-            ? { chain: 'hypercore' as const, tx: result.tx }
-            : null;
-        } catch {
-          return null;
-        }
-      })();
-
-      const results = await Promise.all([hyperEvmPromise, hyperCorePromise]);
-      const hyperEvmResult = results[0];
-      const hyperCoreResult = results[1];
-
-      if (hyperEvmResult || hyperCoreResult) {
+      if (result) {
         // Transaction found on at least one chain - redirect to transaction page
         const coercedNetwork =
           network === 'custom'

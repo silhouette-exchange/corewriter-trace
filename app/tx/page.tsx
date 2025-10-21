@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { TransactionInfo } from '../components/TransactionInfo';
 import { HyperCoreTransactionInfo } from '../components/HyperCoreTransactionInfo';
 import { AllLogs } from '../components/AllLogs';
@@ -16,8 +17,8 @@ import {
   Block,
 } from 'ethers';
 import { CORE_WRITER_ADDRESS } from '../../constants/addresses';
-import * as hl from '@nktkas/hyperliquid';
-import { HttpTransportOptions } from '@nktkas/hyperliquid';
+import { isValidTxHash } from '../utils/validation';
+import { searchBothChains } from '../utils/chainSearch';
 
 // Define the transaction details type based on the API response structure
 interface TxDetails {
@@ -173,12 +174,7 @@ export default function TransactionPage() {
       }
 
       // Validate transaction hash format
-      const trimmed = txHash.trim();
-      if (
-        !trimmed.startsWith('0x') ||
-        trimmed.length !== 66 ||
-        !/^0x[0-9a-fA-F]{64}$/.test(trimmed)
-      ) {
+      if (!isValidTxHash(txHash)) {
         setError('Invalid transaction hash format');
         setLoading(false);
         return;
@@ -189,39 +185,14 @@ export default function TransactionPage() {
       setHyperEvmError('');
       setHyperCoreError('');
 
-      // Try both chains in parallel
-      const hyperEvmPromise = (async () => {
-        try {
-          const receipt = await provider.getTransactionReceipt(txHash);
-          return receipt ? { chain: 'hyperevm' as const, receipt } : null;
-        } catch {
-          return null;
-        }
-      })();
+      // Try both chains in parallel using utility function
+      const result = await searchBothChains(
+        txHash,
+        provider,
+        network === 'testnet'
+      );
 
-      const hyperCorePromise = (async () => {
-        try {
-          const transportConfig: HttpTransportOptions = {
-            isTestnet: network === 'testnet',
-          };
-          const transport = new hl.HttpTransport(transportConfig);
-          const client = new hl.InfoClient({ transport });
-          const result = await client.txDetails({
-            hash: txHash as `0x${string}`,
-          });
-          return result.tx
-            ? { chain: 'hypercore' as const, tx: result.tx }
-            : null;
-        } catch {
-          return null;
-        }
-      })();
-
-      const results = await Promise.all([hyperEvmPromise, hyperCorePromise]);
-      const hyperEvmResult = results[0];
-      const hyperCoreResult = results[1];
-
-      if (hyperEvmResult) {
+      if (result?.chain === 'hyperevm') {
         // Transaction found on HyperEVM
         setChainType('hyperevm');
         setHyperEvmLogs([]);
@@ -232,7 +203,7 @@ export default function TransactionPage() {
         setHyperEvmLoading(true);
         setLoading(false);
         await loadHyperEVM(txHash);
-      } else if (hyperCoreResult) {
+      } else if (result?.chain === 'hypercore') {
         // Transaction found on HyperCore
         setChainType('hypercore');
         setHyperCoreTx(null);
@@ -252,34 +223,16 @@ export default function TransactionPage() {
     loadTransaction();
   }, [txHash, network, provider, loadHyperEVM, loadHyperCore]);
 
-  const handleBackToSearch = () => {
-    router.push('/');
-  };
-
   return (
     <div className="App">
       <div className="header">
+        <Link href="/" className="back-button">
+          ← Back to Search
+        </Link>
         <h1>Transaction Details</h1>
         <p className="subtitle">
           Network: <strong>{network === 'testnet' ? 'Testnet' : 'Mainnet'}</strong>
         </p>
-        <button 
-          onClick={handleBackToSearch}
-          className="back-button"
-          style={{
-            marginTop: '1rem',
-            padding: '0.5rem 1rem',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            fontWeight: '500',
-          }}
-        >
-          ← Back to Search
-        </button>
       </div>
 
       {loading && (
