@@ -81,7 +81,7 @@ export function HyperCoreTransactionInfo({
           <span className="info-label">User:</span>
           <span className="info-value hash-value">
             <Link
-              href={`/account?address=${txDetails.user}`}
+              href={`/account?address=${txDetails.user}&network=${isTestnet ? 'testnet' : 'mainnet'}`}
               className="clickable-address"
             >
               {txDetails.user}

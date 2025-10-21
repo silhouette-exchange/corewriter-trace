@@ -322,6 +322,7 @@ export default function TransactionPage() {
               transaction={hyperEvmTransaction}
               receipt={hyperEvmReceipt}
               block={hyperEvmBlock}
+              network={network}
             />
           </div>
 
