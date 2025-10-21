@@ -15,7 +15,7 @@ import {
   TransactionReceipt,
   Block,
 } from 'ethers';
-import { CORE_WRITER_ADDRESS } from '../../../constants/addresses';
+import { CORE_WRITER_ADDRESS } from '../../constants/addresses';
 import * as hl from '@nktkas/hyperliquid';
 import { HttpTransportOptions } from '@nktkas/hyperliquid';
 
