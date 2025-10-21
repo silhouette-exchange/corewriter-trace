@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState, useMemo, useEffect } from 'react';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { TransactionInfo } from '../../components/TransactionInfo';
 import { HyperCoreTransactionInfo } from '../../components/HyperCoreTransactionInfo';
 import { AllLogs } from '../../components/AllLogs';
@@ -44,10 +44,9 @@ type ChainType = 'hyperevm' | 'hypercore';
 
 export default function TransactionPage() {
   const router = useRouter();
-  const params = useParams();
   const searchParams = useSearchParams();
   
-  const txHash = params.txHash as string;
+  const txHash = searchParams.get('hash') || '';
   const network = (searchParams.get('network') as Network) || 'mainnet';
 
   // Chain type determined by search result
@@ -364,4 +363,3 @@ export default function TransactionPage() {
     </div>
   );
 }
-

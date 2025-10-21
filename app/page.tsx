@@ -129,7 +129,7 @@ export default function Home() {
               : 'mainnet'
             : network;
         setLoading(false);
-        router.push(`/tx/${trimmedInput}?network=${coercedNetwork}`);
+        router.push(`/tx?hash=${trimmedInput}&network=${coercedNetwork}`);
       } else {
         // Not found on either chain
         setLoading(false);
