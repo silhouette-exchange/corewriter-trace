@@ -2,11 +2,11 @@
 
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { TransactionInfo } from '../../components/TransactionInfo';
-import { HyperCoreTransactionInfo } from '../../components/HyperCoreTransactionInfo';
-import { AllLogs } from '../../components/AllLogs';
-import { CoreWriterActionLog } from '../../components/CoreWriterActionLog';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { TransactionInfo } from '../components/TransactionInfo';
+import { HyperCoreTransactionInfo } from '../components/HyperCoreTransactionInfo';
+import { AllLogs } from '../components/AllLogs';
+import { CoreWriterActionLog } from '../components/CoreWriterActionLog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import {
   JsonRpcProvider,
   Log,
