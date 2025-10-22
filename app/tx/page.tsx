@@ -19,6 +19,8 @@ import {
 import { CORE_WRITER_ADDRESS } from '../../constants/addresses';
 import { isValidTxHash } from '../utils/validation';
 import { searchBothChains } from '../utils/chainSearch';
+import * as hl from '@nktkas/hyperliquid';
+import { HttpTransportOptions } from '@nktkas/hyperliquid';
 
 // Define the transaction details type based on the API response structure
 interface TxDetails {
