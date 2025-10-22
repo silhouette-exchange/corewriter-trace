@@ -121,7 +121,9 @@ export function HyperCoreTransactionList({
         {transactions.map((tx, idx) => (
           <div key={idx} className="transaction-table-row">
             <span className="transaction-hash">
-              <Link href={`/tx/${encodeURIComponent(tx.hash)}?network=${isTestnet ? 'testnet' : 'mainnet'}`}>
+              <Link
+                href={`/tx?tx=${encodeURIComponent(tx.hash)}&network=${isTestnet ? 'testnet' : 'mainnet'}`}
+              >
                 {tx.hash.slice(0, 10)}...{tx.hash.slice(-8)}
               </Link>
             </span>

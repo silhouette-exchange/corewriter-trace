@@ -3,9 +3,9 @@ interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-export const LoadingSpinner = ({ 
-  message = 'Loading...', 
-  size = 'medium' 
+export const LoadingSpinner = ({
+  message = 'Loading...',
+  size = 'medium',
 }: LoadingSpinnerProps) => {
   return (
     <div className="loading-spinner-container">
@@ -16,4 +16,3 @@ export const LoadingSpinner = ({
     </div>
   );
 };
-

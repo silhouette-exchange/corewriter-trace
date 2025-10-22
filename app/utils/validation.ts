@@ -11,4 +11,3 @@ export function isValidTxHash(input: string): boolean {
     /^0x[0-9a-fA-F]{64}$/.test(trimmed)
   );
 }
-

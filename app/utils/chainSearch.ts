@@ -53,4 +53,3 @@ export async function searchBothChains(
   if (hyperCoreResult) return hyperCoreResult;
   return null;
 }
-

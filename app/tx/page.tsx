@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useCallback, useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { TransactionInfo } from '../../components/TransactionInfo';
-import { HyperCoreTransactionInfo } from '../../components/HyperCoreTransactionInfo';
-import { AllLogs } from '../../components/AllLogs';
-import { CoreWriterActionLog } from '../../components/CoreWriterActionLog';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { TransactionInfo } from '../components/TransactionInfo';
+import { HyperCoreTransactionInfo } from '../components/HyperCoreTransactionInfo';
+import { AllLogs } from '../components/AllLogs';
+import { CoreWriterActionLog } from '../components/CoreWriterActionLog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import {
   JsonRpcProvider,
   Log,
@@ -16,9 +16,9 @@ import {
   TransactionReceipt,
   Block,
 } from 'ethers';
-import { CORE_WRITER_ADDRESS } from '../../../constants/addresses';
-import { isValidTxHash } from '../../utils/validation';
-import { searchBothChains } from '../../utils/chainSearch';
+import { CORE_WRITER_ADDRESS } from '../../constants/addresses';
+import { isValidTxHash } from '../utils/validation';
+import { searchBothChains } from '../utils/chainSearch';
 import * as hl from '@nktkas/hyperliquid';
 import { HttpTransportOptions } from '@nktkas/hyperliquid';
 
@@ -45,15 +45,11 @@ const CORE_WRITER = new Interface([
 type Network = 'mainnet' | 'testnet';
 type ChainType = 'hyperevm' | 'hypercore';
 
-export default function TransactionPage({
-  params,
-}: {
-  params: { txHash: string };
-}) {
+function TransactionPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const txHash = params.txHash;
+
+  const txHash = searchParams.get('tx') || '';
   const network = (searchParams.get('network') as Network) || 'mainnet';
 
   // Chain type determined by search result
@@ -78,9 +74,7 @@ export default function TransactionPage({
 
   const provider = useMemo(() => {
     const rpcUrl = network === 'testnet' ? TESTNET_RPC : MAINNET_RPC;
-    return new JsonRpcProvider(rpcUrl, 999, {
-      staticNetwork: true,
-    });
+    return new JsonRpcProvider(rpcUrl);
   }, [network]);
 
   const loadHyperEVM = useCallback(
@@ -116,11 +110,13 @@ export default function TransactionPage({
           }
         }
 
-        // Filter CoreWriter logs
+        // Filter CoreWriter logs by address AND RawAction event topic
+        const rawActionTopic = CORE_WRITER.getEvent('RawAction')!.topicHash;
         const coreWriterLogs =
           receiptResult?.logs.filter(
             log =>
-              log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase()
+              log.address.toLowerCase() === CORE_WRITER_ADDRESS.toLowerCase() &&
+              log.topics[0] === rawActionTopic
           ) ?? [];
 
         setHyperEvmLogs(coreWriterLogs);
@@ -237,13 +233,14 @@ export default function TransactionPage({
         </Link>
         <h1>Transaction Details</h1>
         <p className="subtitle">
-          Network: <strong>{network === 'testnet' ? 'Testnet' : 'Mainnet'}</strong>
+          Network:{' '}
+          <strong>{network === 'testnet' ? 'Testnet' : 'Mainnet'}</strong>
         </p>
       </div>
 
       {loading && (
-        <LoadingSpinner 
-          message="Searching for transaction on HyperEVM and HyperCore..." 
+        <LoadingSpinner
+          message="Searching for transaction on HyperEVM and HyperCore..."
           size="large"
         />
       )}
@@ -251,8 +248,8 @@ export default function TransactionPage({
       {error && <div className="error-message">{error}</div>}
 
       {chainType === 'hyperevm' && hyperEvmLoading && (
-        <LoadingSpinner 
-          message="Loading HyperEVM transaction details..." 
+        <LoadingSpinner
+          message="Loading HyperEVM transaction details..."
           size="large"
         />
       )}
@@ -262,8 +259,8 @@ export default function TransactionPage({
       )}
 
       {chainType === 'hypercore' && hyperCoreLoading && (
-        <LoadingSpinner 
-          message="Loading HyperCore transaction details..." 
+        <LoadingSpinner
+          message="Loading HyperCore transaction details..."
           size="large"
         />
       )}
@@ -272,44 +269,50 @@ export default function TransactionPage({
         <div className="error-message">{hyperCoreError}</div>
       )}
 
-      {chainType === 'hyperevm' && hyperEvmTransaction && hyperEvmReceipt && !hyperEvmLoading && (
-        <>
-          <h2>HyperEVM Transaction Details</h2>
-          <div className="results-section">
-            <h3>Transaction Overview</h3>
-            <TransactionInfo
-              transaction={hyperEvmTransaction}
-              receipt={hyperEvmReceipt}
-              block={hyperEvmBlock}
-              network={network}
-            />
-          </div>
-
-          <div className="results-section">
-            <AllLogs logs={[...hyperEvmReceipt.logs]} />
-          </div>
-
-          {hyperEvmLogs.length > 0 && (
+      {chainType === 'hyperevm' &&
+        hyperEvmTransaction &&
+        hyperEvmReceipt &&
+        !hyperEvmLoading && (
+          <>
+            <h2>HyperEVM Transaction Details</h2>
             <div className="results-section">
-              <h3>CoreWriter Actions ({hyperEvmLogs.length})</h3>
-              <div className="corewriter-actions">
-                {hyperEvmLogs.map((log, index) => (
-                  <CoreWriterActionLog
-                    key={index}
-                    data={
-                      CORE_WRITER.decodeEventLog(
+              <h3>Transaction Overview</h3>
+              <TransactionInfo
+                transaction={hyperEvmTransaction}
+                receipt={hyperEvmReceipt}
+                block={hyperEvmBlock}
+                network={network}
+              />
+            </div>
+
+            <div className="results-section">
+              <AllLogs logs={[...hyperEvmReceipt.logs]} />
+            </div>
+
+            {hyperEvmLogs.length > 0 && (
+              <div className="results-section">
+                <h3>CoreWriter Actions ({hyperEvmLogs.length})</h3>
+                <div className="corewriter-actions">
+                  {hyperEvmLogs.map((log, index) => {
+                    try {
+                      const decoded = CORE_WRITER.decodeEventLog(
                         CORE_WRITER.getEvent('RawAction')!,
                         log.data,
                         log.topics
-                      )[1]
+                      );
+                      return (
+                        <CoreWriterActionLog key={index} data={decoded[1]} />
+                      );
+                    } catch (err) {
+                      console.error('Failed to decode log:', err);
+                      return null;
                     }
-                  />
-                ))}
+                  })}
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
 
       {chainType === 'hypercore' && hyperCoreTx && !hyperCoreLoading && (
         <div className="results-section">
@@ -321,5 +324,13 @@ export default function TransactionPage({
         </div>
       )}
     </div>
+  );
+}
+
+export default function TransactionPage() {
+  return (
+    <Suspense fallback={<div className="loading-state">Loading transaction...</div>}>
+      <TransactionPageContent />
+    </Suspense>
   );
 }

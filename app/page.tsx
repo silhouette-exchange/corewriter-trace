@@ -34,9 +34,7 @@ export default function Home() {
       rpcUrl = MAINNET_RPC;
     }
 
-    return new JsonRpcProvider(rpcUrl, 999, {
-      staticNetwork: true,
-    });
+    return new JsonRpcProvider(rpcUrl);
   }, [network, customRpc]);
 
   // Validation helpers
@@ -92,7 +90,7 @@ export default function Home() {
               : 'mainnet'
             : network;
         setLoading(false);
-        router.push(`/tx/${encodeURIComponent(trimmedInput)}?network=${coercedNetwork}`);
+        router.push(`/tx?tx=${encodeURIComponent(trimmedInput)}&network=${coercedNetwork}`);
       } else {
         // Not found on either chain
         setLoading(false);
