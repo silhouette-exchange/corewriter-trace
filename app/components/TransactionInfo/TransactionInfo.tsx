@@ -11,12 +11,14 @@ interface TransactionInfoProps {
   transaction: TransactionResponse;
   receipt: TransactionReceipt;
   block: Block | null;
+  network?: 'mainnet' | 'testnet';
 }
 
 export const TransactionInfo = ({
   transaction,
   receipt,
   block,
+  network = 'mainnet',
 }: TransactionInfoProps) => {
   const formatGasPrice = useCallback((gasPrice: bigint | null) => {
     if (!gasPrice) return 'N/A';
@@ -91,7 +93,7 @@ export const TransactionInfo = ({
               <td className="info-value">
                 <code>
                   <Link
-                    href={`/account?address=${transaction.from}`}
+                    href={`/account?address=${transaction.from}&network=${network}`}
                     className="clickable-address"
                   >
                     {transaction.from}
@@ -105,7 +107,7 @@ export const TransactionInfo = ({
                 <code>
                   {transaction.to ? (
                     <Link
-                      href={`/account?address=${transaction.to}`}
+                      href={`/account?address=${transaction.to}&network=${network}`}
                       className="clickable-address"
                     >
                       {transaction.to}

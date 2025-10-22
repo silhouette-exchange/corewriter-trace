@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { HyperEvmAccountDetails } from '../components/AccountDetails/HyperEvmAccountDetails';
 import { HyperCoreAccountDetails } from '../components/AccountDetails/HyperCoreAccountDetails';
 
@@ -47,6 +48,9 @@ function AccountContent() {
   return (
     <div className="App">
       <div className="header">
+        <Link href="/" className="back-button">
+          ← Back to Search
+        </Link>
         <h1>Account Details</h1>
         <p className="subtitle">
           View account balances and transaction history across HyperEVM and
