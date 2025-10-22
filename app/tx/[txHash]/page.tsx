@@ -3,11 +3,11 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { TransactionInfo } from '../components/TransactionInfo';
-import { HyperCoreTransactionInfo } from '../components/HyperCoreTransactionInfo';
-import { AllLogs } from '../components/AllLogs';
-import { CoreWriterActionLog } from '../components/CoreWriterActionLog';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import { TransactionInfo } from '../../components/TransactionInfo';
+import { HyperCoreTransactionInfo } from '../../components/HyperCoreTransactionInfo';
+import { AllLogs } from '../../components/AllLogs';
+import { CoreWriterActionLog } from '../../components/CoreWriterActionLog';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
 import {
   JsonRpcProvider,
   Log,
@@ -16,9 +16,9 @@ import {
   TransactionReceipt,
   Block,
 } from 'ethers';
-import { CORE_WRITER_ADDRESS } from '../../constants/addresses';
-import { isValidTxHash } from '../utils/validation';
-import { searchBothChains } from '../utils/chainSearch';
+import { CORE_WRITER_ADDRESS } from '../../../constants/addresses';
+import { isValidTxHash } from '../../utils/validation';
+import { searchBothChains } from '../../utils/chainSearch';
 import * as hl from '@nktkas/hyperliquid';
 import { HttpTransportOptions } from '@nktkas/hyperliquid';
 
@@ -45,11 +45,15 @@ const CORE_WRITER = new Interface([
 type Network = 'mainnet' | 'testnet';
 type ChainType = 'hyperevm' | 'hypercore';
 
-export default function TransactionPage() {
+export default function TransactionPage({
+  params,
+}: {
+  params: { txHash: string };
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const txHash = searchParams.get('hash') || '';
+  const txHash = params.txHash;
   const network = (searchParams.get('network') as Network) || 'mainnet';
 
   // Chain type determined by search result
